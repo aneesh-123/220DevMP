@@ -1,0 +1,8 @@
+. . . . . . .
+. . . . . . .
+. X . O . . .
+X O . X O . .
+O X X O X . .
+X O O X O X .
+TURN O
+REM X=0 O=0
