@@ -16,10 +16,10 @@
  *   ./connect4 --bench-all boards -d 5
  *
  * FLAGS
- *   -m <0|1|2|3|4>    AI mode (default: 0)
+ *   -m <0|1|2|3|4|5>  AI mode (default: 0)
  *   -d <depth>         Search depth (default: 4)
  *   --bench <path>     Benchmark one mode on board(s)
- *   --bench-all <path> Benchmark ALL modes (0-4) with comparison table
+ *   --bench-all <path> Benchmark ALL modes (0-5) with comparison table
  *   --play             Interactive human-vs-AI mode
  *   --ai X|O           Which side the AI plays (default: O)
  *   -h / --help        Print usage
@@ -40,17 +40,19 @@
 #include "ai_mode2.h"
 #include "ai_mode3.h"
 #include "ai_mode4.h"
+#include "ai_mode5.h"
 
 /* ---- Constants ---- */
 #define MAX_BOARDS 64
-#define NUM_MODES  5
+#define NUM_MODES  6
 
 static const char *MODE_NAMES[NUM_MODES] = {
     "Minimax",
     "AlphaBeta",
     "AB+MoveOrder",
     "AB+MO+TT",
-    "AB+MO+TT+ID"
+    "AB+MO+TT+ID",
+    "GoldStandard"
 };
 
 /* ---- Board file loading ---- */
@@ -193,8 +195,9 @@ static int load_boards(const char *path, BoardEntry *boards) {
 
 /* ---- Dispatch ---- */
 static Move dispatch_ai(const GameState *s, int mode, int depth, Metrics *m) {
-    /* Clear TT before modes 3/4 to ensure fair per-board comparison. */
+    /* Clear TT before modes 3/4/5 to ensure fair per-board comparison. */
     if (mode == 3 || mode == 4) mode3_tt_clear();
+    if (mode == 5) mode5_tt_clear();
 
     switch (mode) {
         case 0:  return ai_choose_move_mode0(s, depth, m);
@@ -202,6 +205,7 @@ static Move dispatch_ai(const GameState *s, int mode, int depth, Metrics *m) {
         case 2:  return ai_choose_move_mode2(s, depth, m);
         case 3:  return ai_choose_move_mode3(s, depth, m);
         case 4:  return ai_choose_move_mode4(s, depth, m);
+        case 5:  return ai_choose_move_mode5(s, depth, m);
         default: fprintf(stderr, "Error: unknown mode %d\n", mode); exit(1);
     }
 }
@@ -447,11 +451,11 @@ static void run_interactive(int mode, int depth, char ai_player) {
 /* ---- Usage ---- */
 static void print_usage(const char *prog) {
     printf("Usage:\n");
-    printf("  %s --play -m <0-4> -d <depth> [--ai X|O]\n", prog);
-    printf("  %s --bench <path> -m <0-4> -d <depth>\n", prog);
+    printf("  %s --play -m <0-5> -d <depth> [--ai X|O]\n", prog);
+    printf("  %s --bench <path> -m <0-5> -d <depth>\n", prog);
     printf("  %s --bench-all <path> -d <depth>\n", prog);
     printf("\nFlags:\n");
-    printf("  -m          AI mode (0=minimax, 1=AB, 2=AB+MO, 3=AB+MO+TT, 4=+ID)\n");
+    printf("  -m          AI mode (0=minimax, 1=AB, 2=AB+MO, 3=AB+MO+TT, 4=+ID, 5=gold)\n");
     printf("  -d          Search depth (default: 4)\n");
     printf("  --play      Interactive human vs AI\n");
     printf("  --bench     Benchmark single mode on board(s)\n");
@@ -471,8 +475,8 @@ int main(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-m") == 0 && i + 1 < argc) {
             mode = atoi(argv[++i]);
-            if (mode < 0 || mode > 4) {
-                fprintf(stderr, "Error: mode must be 0..4\n"); return 1;
+            if (mode < 0 || mode > 5) {
+                fprintf(stderr, "Error: mode must be 0..5\n"); return 1;
             }
         } else if (strcmp(argv[i], "-d") == 0 && i + 1 < argc) {
             depth = atoi(argv[++i]);
@@ -498,8 +502,9 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    /* Initialize Mode 3/4 Zobrist keys (harmless if not used). */
+    /* Initialize Zobrist keys (harmless if not used). */
     mode3_init();
+    mode5_init();
 
     /* --bench-all mode */
     if (bench_all_path) {
