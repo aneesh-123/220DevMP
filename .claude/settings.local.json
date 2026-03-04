@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gcc -O2 -std=c11 -Wall -Wextra -pedantic engine.c ai.c main.c -o c4)"
+    ]
+  }
+}

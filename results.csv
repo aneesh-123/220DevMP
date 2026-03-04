@@ -1,0 +1,16 @@
+board,mode,mode_name,depth,move,time_ms,nodes,tt_probes,tt_hits
+board1_early.txt,0,minimax,6,REMOVE col=3 row=1,2500.0,2782912,0,0
+board1_early.txt,1,alpha-beta,6,REMOVE col=3 row=1,109.0,91571,0,0
+board1_early.txt,2,alpha-beta+TT,6,REMOVE col=3 row=1,57.0,47341,12633,5810
+board2_midgame.txt,0,minimax,6,DROP col=3,12057.0,12061988,0,0
+board2_midgame.txt,1,alpha-beta,6,DROP col=3,159.0,104513,0,0
+board2_midgame.txt,2,alpha-beta+TT,6,DROP col=3,58.0,39353,12938,6188
+board3_dense.txt,0,minimax,6,DROP col=0,0.0,0,0,0
+board3_dense.txt,1,alpha-beta,6,DROP col=0,0.0,0,0,0
+board3_dense.txt,2,alpha-beta+TT,6,DROP col=0,0.0,0,0,0
+board4_threat.txt,0,minimax,6,DROP col=3,4924.0,5459211,0,0
+board4_threat.txt,1,alpha-beta,6,DROP col=3,50.0,42813,0,0
+board4_threat.txt,2,alpha-beta+TT,6,DROP col=3,14.0,12102,2248,850
+board5_complex.txt,0,minimax,6,DROP col=1,6135.0,5465091,0,0
+board5_complex.txt,1,alpha-beta,6,DROP col=1,0.0,0,0,0
+board5_complex.txt,2,alpha-beta+TT,6,DROP col=1,0.0,0,0,0
