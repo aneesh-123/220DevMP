@@ -16,7 +16,7 @@ class GameState:
         board: 6x7 board. Each cell is None (empty), 0 (player 0), or 1 (player 1).
                board[0] is the top row, board[5] is the bottom row.
         current_player: 0 or 1, whose turn it is.
-        removals_remaining: List [player0_removals, player1_removals], max 3 each per game.
+        removals_remaining: List [player0_removals, player1_removals], max 1 each per game.
         is_terminal: True if game is over (someone won or board is full).
         winner: None if not terminal, 0 or 1 if someone won.
         move_history: List of moves made so far (for debugging/replay).
@@ -24,7 +24,7 @@ class GameState:
 
     board: list = field(default_factory=lambda: [[None for _ in range(7)] for _ in range(6)])
     current_player: int = 0
-    removals_remaining: list = field(default_factory=lambda: [3, 3])
+    removals_remaining: list = field(default_factory=lambda: [1, 1])
     is_terminal: bool = False
     winner: Optional[int] = None
     move_history: list = field(default_factory=list)

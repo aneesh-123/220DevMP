@@ -2,7 +2,8 @@
 Simple CLI and runner for Connect 4.
 
 Provides:
-- Interactive play against MinimaxBot
+- Interactive play against Bot A or Bot B
+- Watch bots play each other
 - Batch experiments comparing bots
 - Simple command-line interface
 """
@@ -14,20 +15,28 @@ from .experiment import Experiment
 from .rules import get_legal_moves, apply_move
 
 
-def play_interactive_game(depth: int = 5):
+# Create the two bots globally
+BOT_A = MinimaxBot(evaluator=BasicEvaluator(), depth=4)
+BOT_B = MinimaxBot(evaluator=StudentEvaluator(), depth=4)
+
+BOT_A_NAME = "Bot A (BasicEvaluator)"
+BOT_B_NAME = "Bot B (Threat Detection)"
+
+
+def play_interactive_game(bot, bot_name: str):
     """
-    Play an interactive game against a MinimaxBot.
+    Play an interactive game against a bot.
 
     The human is player 0 (O), the bot is player 1 (X).
 
     Args:
-        depth: Search depth for minimax (default 5).
+        bot: The bot to play against.
+        bot_name: Display name for the bot.
     """
     state = GameState()
-    bot = MinimaxBot(evaluator=BasicEvaluator(), depth=depth)
 
     print("\n" + state.display())
-    print(f"\nYou are player 0 (O). Playing against {bot}.")
+    print(f"\nYou are player 0 (O). Playing against {bot_name}.")
     print("Commands:")
     print("  place <column>    - Drop a piece in column (0-6)")
     print("  remove <row> <col> - Remove piece at (row, col)")
@@ -77,7 +86,7 @@ def play_interactive_game(depth: int = 5):
             if move is None:
                 print("Bot has no legal moves.")
                 break
-            print(f"\nBot plays: {move}")
+            print(f"\n{bot_name} plays: {move}")
             state = apply_move(state, move)
 
         print("\n" + state.display())
@@ -130,53 +139,22 @@ def watch_game(bot1, bot2, bot1_name: str, bot2_name: str):
     print("\n" + "=" * 50)
     if state.winner is not None:
         winner_name = bot1_name if state.winner == 0 else bot2_name
-        print(f"Game over! {winner_name} (player {state.winner}) wins in {move_count} moves!")
+        print(f"Game over! {winner_name} wins in {move_count} moves!")
     else:
         print(f"Game over! Draw in {move_count} moves.")
     print("=" * 50)
 
 
-def main():
-    """
-    Simple CLI menu.
-    """
-    while True:
-        print("\n" + "=" * 50)
-        print("Connect 4 with Removals - AI Heuristic Design")
-        print("=" * 50)
-        print("1. Play against MinimaxBot (depth 5)")
-        print("2. Watch two MinimaxBots (depth 5) play")
-        print("3. Compare two heuristics (experiment)")
-        print("4. Quit")
-        print()
-
-        choice = input("Choose option (1-4): ").strip()
-
-        if choice == "1":
-            play_interactive_game(depth=5)
-        elif choice == "2":
-            bot1 = MinimaxBot(evaluator=BasicEvaluator(), depth=5)
-            bot2 = MinimaxBot(evaluator=BasicEvaluator(), depth=5)
-            watch_game(bot1, bot2, "MinimaxBot-1 (depth 5)", "MinimaxBot-2 (depth 5)")
-        elif choice == "3":
-            run_experiment_interactive()
-        elif choice == "4":
-            print("Goodbye!")
-            break
-        else:
-            print("Invalid choice.")
-
-
 def run_experiment_interactive():
     """
     Interactive experiment runner.
-    Compares BasicEvaluator (baseline) vs StudentEvaluator (with threat detection).
+    Compares Bot A (baseline) vs Bot B (threat detection).
     """
     print("\n" + "=" * 50)
-    print("Experiment: Compare Two Heuristics")
+    print("Experiment: Compare Two Bots")
     print("=" * 50)
-    print("Bot 1: MinimaxBot(depth=3, BasicEvaluator) - BASELINE")
-    print("Bot 2: MinimaxBot(depth=3, StudentEvaluator) - WITH THREAT DETECTION")
+    print(f"Bot 1: {BOT_A_NAME}")
+    print(f"Bot 2: {BOT_B_NAME}")
     print()
 
     num_games = input("How many games? (default 10): ").strip()
@@ -188,12 +166,9 @@ def run_experiment_interactive():
     print(f"\nRunning {num_games} games with alternating starts...")
     print("(Same search depth, different heuristics)\n")
 
-    bot1 = MinimaxBot(evaluator=BasicEvaluator(), depth=4)
-    bot2 = MinimaxBot(evaluator=StudentEvaluator(), depth=4)
-
     experiment = Experiment(
-        bot1=bot1,
-        bot2=bot2,
+        bot1=BOT_A,
+        bot2=BOT_B,
         num_games=num_games,
         verbose=True,
         seed=42,
@@ -206,14 +181,45 @@ def run_experiment_interactive():
     print()
     print("INTERPRETATION:")
     if results.bot2_wins > results.bot1_wins:
-        print(f"  ✓ StudentEvaluator (threat detection) is stronger!")
+        print(f"  ✓ Bot B (threat detection) is stronger!")
         print(f"    It won {results.bot2_wins} vs {results.bot1_wins} games")
     elif results.bot1_wins > results.bot2_wins:
-        print(f"  ✗ BasicEvaluator won more games ({results.bot1_wins} vs {results.bot2_wins})")
+        print(f"  ✗ Bot A won more games ({results.bot1_wins} vs {results.bot2_wins})")
         print(f"    Threat detection may need tuning")
     else:
         print(f"  ~ They tied ({results.bot1_wins} wins each)")
 
+
+def main():
+    """
+    Simple CLI menu.
+    """
+    while True:
+        print("\n" + "=" * 50)
+        print("Connect 4 with Removals - AI Heuristic Design")
+        print("=" * 50)
+        print("1. Play against Bot A (baseline)")
+        print("2. Play against Bot B (threat detection)")
+        print("3. Watch Bot A vs Bot B")
+        print("4. Compare both bots (experiment)")
+        print("5. Quit")
+        print()
+
+        choice = input("Choose option (1-5): ").strip()
+
+        if choice == "1":
+            play_interactive_game(BOT_A, BOT_A_NAME)
+        elif choice == "2":
+            play_interactive_game(BOT_B, BOT_B_NAME)
+        elif choice == "3":
+            watch_game(BOT_A, BOT_B, BOT_A_NAME, BOT_B_NAME)
+        elif choice == "4":
+            run_experiment_interactive()
+        elif choice == "5":
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid choice.")
 
 
 if __name__ == "__main__":
