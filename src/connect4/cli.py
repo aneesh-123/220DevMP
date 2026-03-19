@@ -9,7 +9,7 @@ Provides:
 
 from .board import GameState
 from .bots import MinimaxBot
-from .heuristics import BasicEvaluator
+from .heuristics import BasicEvaluator, StudentEvaluator
 from .experiment import Experiment
 from .rules import get_legal_moves, apply_move
 
@@ -170,14 +170,13 @@ def main():
 def run_experiment_interactive():
     """
     Interactive experiment runner.
-    Let user choose two bots to compare.
+    Compares BasicEvaluator (baseline) vs StudentEvaluator (with threat detection).
     """
     print("\n" + "=" * 50)
-    print("Experiment: Compare Two Bots")
+    print("Experiment: Compare Two Heuristics")
     print("=" * 50)
-    print("Bot 1 will be: MinimaxBot(depth=5, BasicEvaluator)")
-    print("Bot 2 will be: MinimaxBot(depth=5, BasicEvaluator)")
-    print("(In your heuristics.py, modify to test different evaluators)")
+    print("Bot 1: MinimaxBot(depth=3, BasicEvaluator) - BASELINE")
+    print("Bot 2: MinimaxBot(depth=3, StudentEvaluator) - WITH THREAT DETECTION")
     print()
 
     num_games = input("How many games? (default 10): ").strip()
@@ -186,11 +185,11 @@ def run_experiment_interactive():
     except ValueError:
         num_games = 10
 
-    print(f"\nRunning {num_games} games...")
-    print("(Both bots use BasicEvaluator - modify heuristics.py to test your own!)\n")
+    print(f"\nRunning {num_games} games with alternating starts...")
+    print("(Same search depth, different heuristics)\n")
 
-    bot1 = MinimaxBot(evaluator=BasicEvaluator(), depth=5)
-    bot2 = MinimaxBot(evaluator=BasicEvaluator(), depth=5)
+    bot1 = MinimaxBot(evaluator=BasicEvaluator(), depth=4)
+    bot2 = MinimaxBot(evaluator=StudentEvaluator(), depth=4)
 
     experiment = Experiment(
         bot1=bot1,
@@ -203,6 +202,18 @@ def run_experiment_interactive():
 
     results = experiment.run()
     print(results)
+
+    print()
+    print("INTERPRETATION:")
+    if results.bot2_wins > results.bot1_wins:
+        print(f"  ✓ StudentEvaluator (threat detection) is stronger!")
+        print(f"    It won {results.bot2_wins} vs {results.bot1_wins} games")
+    elif results.bot1_wins > results.bot2_wins:
+        print(f"  ✗ BasicEvaluator won more games ({results.bot1_wins} vs {results.bot2_wins})")
+        print(f"    Threat detection may need tuning")
+    else:
+        print(f"  ~ They tied ({results.bot1_wins} wins each)")
+
 
 
 if __name__ == "__main__":

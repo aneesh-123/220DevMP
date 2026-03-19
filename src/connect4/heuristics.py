@@ -79,60 +79,154 @@ class BasicEvaluator:
 
 class StudentEvaluator:
     """
-    YOUR EVALUATOR HERE.
+    Evaluator with THREAT DETECTION heuristic.
 
-    Replace or extend BasicEvaluator with features you think are important.
+    This combines:
+    1. Piece count (from BasicEvaluator)
+    2. Center control (from BasicEvaluator)
+    3. THREAT DETECTION (new): Heavily penalizes positions where opponent can win next move
 
-    Suggested features to explore:
-    - Threat detection: Opponent can win in 1 move? High penalty.
-    - Opportunity: You can win in 1 move? High bonus.
-    - Territory: Control of center, key columns, key rows.
-    - Clustering: Pieces grouped together (potential for 4-in-a-row).
-    - Removal count: How many removals left for each player? Strategic value?
-    - Fragmentation: Opponent's pieces spread thin = good for you.
-    - Front row advantage: Pieces closer to playable columns might be stronger.
-
-    TODO: Implement your heuristic features below.
+    Threat detection is one of the most effective heuristics in Connect 4 because:
+    - If opponent has a winning move, you MUST stop them (or you lose immediately)
+    - By heavily penalizing threats, the bot prioritizes blocking
     """
 
     def evaluate(self, state: GameState, player: int) -> float:
         """
         Evaluate the position from the perspective of 'player'.
 
-        TODO: Implement your heuristic logic here.
+        Uses BasicEvaluator as foundation + adds threat detection penalty.
         """
-        # PLACEHOLDER: Just copy the baseline for now
-        evaluator = BasicEvaluator()
-        return evaluator.evaluate(state, player)
+        # Terminal states: immediate win/loss
+        if state.is_terminal:
+            if state.winner == player:
+                return 10000  # Big win bonus
+            elif state.winner is not None:
+                return -10000  # Big loss penalty
+            else:
+                return 0  # Draw
+
+        # Start with basic features
+        my_pieces = state.count_pieces(player)
+        opponent = 1 - player
+        opponent_pieces = state.count_pieces(opponent)
+
+        piece_diff = my_pieces - opponent_pieces
+
+        # Center control bonus (from BasicEvaluator)
+        center_bonus = 0
+        for col in [2, 3, 4]:
+            for row in range(state.ROWS):
+                if state.get_cell(row, col) == player:
+                    center_bonus += 1
+
+        # NEW HEURISTIC: Threat detection
+        # Count how many ways opponent can win next move
+        opponent_threats = count_threats(state, opponent)
+        threat_penalty = opponent_threats * 500  # Heavy penalty for each threat
+
+        # Count player's own winning chances for next move (opportunity bonus)
+        my_opportunities = count_winning_chances(state, player)
+        opportunity_bonus = my_opportunities * 400  # Bonus for own winning moves
+
+        # Combine all features
+        score = (piece_diff * 10) + (center_bonus * 1) + opportunity_bonus - threat_penalty
+
+        return score
 
 
 # ============================================================================
 # HELPER FUNCTIONS (You may implement these to support your heuristics)
 # ============================================================================
 
-def count_threats(state: GameState, player: int, opponent: int) -> int:
+def count_threats(state: GameState, opponent: int) -> int:
     """
     Count how many ways 'opponent' can win in the next move.
 
     High threat count = opponent is dangerous, so this position is bad for 'player'.
 
-    TODO: Implement if you want threat-based heuristics.
+    This works by checking each empty cell: if the opponent could place a piece there
+    and create 4-in-a-row, it counts as a threat.
     """
     threat_count = 0
-    # TODO: For each empty cell, check if filling it with opponent's piece creates 4-in-a-row
+
+    # Check each cell on the board
+    for row in range(state.ROWS):
+        for col in range(state.COLS):
+            # Only check empty cells
+            if state.get_cell(row, col) is None:
+                # Temporarily place opponent's piece
+                state.set_cell(row, col, opponent)
+
+                # Check if this creates a 4-in-a-row for opponent
+                if _check_win_for_player(state, opponent):
+                    threat_count += 1
+
+                # Remove the temporary piece
+                state.set_cell(row, col, None)
+
     return threat_count
+
+
+def _check_win_for_player(state: GameState, player: int) -> bool:
+    """
+    Check if 'player' has 4-in-a-row on the board.
+
+    Unlike rules._check_win(), this doesn't require state.current_player to match.
+    """
+    # Check horizontal
+    for row in range(state.ROWS):
+        for col in range(state.COLS - 3):
+            if all(state.get_cell(row, col + i) == player for i in range(4)):
+                return True
+
+    # Check vertical
+    for col in range(state.COLS):
+        for row in range(state.ROWS - 3):
+            if all(state.get_cell(row + i, col) == player for i in range(4)):
+                return True
+
+    # Check diagonal (top-left to bottom-right)
+    for row in range(state.ROWS - 3):
+        for col in range(state.COLS - 3):
+            if all(state.get_cell(row + i, col + i) == player for i in range(4)):
+                return True
+
+    # Check diagonal (top-right to bottom-left)
+    for row in range(state.ROWS - 3):
+        for col in range(3, state.COLS):
+            if all(state.get_cell(row + i, col - i) == player for i in range(4)):
+                return True
+
+    return False
 
 
 def count_winning_chances(state: GameState, player: int) -> int:
     """
     Count how many ways 'player' can win in the next move.
 
-    High count = player is in a winning position.
+    High count = player is in a winning position (has multiple winning moves).
 
-    TODO: Implement if you want opportunity-based heuristics.
+    This works by checking each empty cell: if the player could place a piece there
+    and create 4-in-a-row, it counts as a winning chance.
     """
     chance_count = 0
-    # TODO: For each empty cell, check if filling it with player's piece creates 4-in-a-row
+
+    # Check each cell on the board
+    for row in range(state.ROWS):
+        for col in range(state.COLS):
+            # Only check empty cells
+            if state.get_cell(row, col) is None:
+                # Temporarily place player's piece
+                state.set_cell(row, col, player)
+
+                # Check if this creates a 4-in-a-row for player
+                if _check_win_for_player(state, player):
+                    chance_count += 1
+
+                # Remove the temporary piece
+                state.set_cell(row, col, None)
+
     return chance_count
 
 

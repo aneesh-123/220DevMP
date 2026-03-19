@@ -118,9 +118,12 @@ class Experiment:
                 draws += 1
 
             if self.verbose:
+                # Determine starting bot name
+                starter = str(self.bot1) if bot1_is_player0 else str(self.bot2)
+
                 print(f"Game {game_num + 1}/{self.num_games}: ", end="")
                 if winner is None:
-                    print("Draw")
+                    print(f"Draw (started: {starter})")
                 else:
                     winner_name = (
                         str(self.bot1)
@@ -128,7 +131,7 @@ class Experiment:
                         or (winner == 1 and not bot1_is_player0)
                         else str(self.bot2)
                     )
-                    print(f"{winner_name} wins")
+                    print(f"{winner_name} wins (started: {starter})")
 
         results = ExperimentResults(
             bot1_wins=bot1_wins,
