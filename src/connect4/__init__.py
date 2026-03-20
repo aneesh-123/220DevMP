@@ -10,7 +10,7 @@ __version__ = "0.1.0"
 from .board import GameState
 from .moves import PlacementMove, RemovalMove
 from .bots import MinimaxBot
-from .heuristics import BasicEvaluator
+from .evaluators import BasicEvaluator
 
 __all__ = [
     "GameState",

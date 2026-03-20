@@ -1,143 +1,148 @@
 """
-Heuristic Evaluation Functions for Connect 4.
+Heuristic Functions for Connect 4 with Removals.
 
-⭐ THIS IS WHERE YOU DO YOUR WORK ⭐
+This module contains all heuristic functions that evaluators can call
+to assess different aspects of a game position.
 
-This module contains evaluation functions that guide the minimax search.
-A better evaluator leads to smarter AI, even with shallow search depth.
-
-The BasicEvaluator below is intentionally weak—it's just enough to make
-the code run. Replace or extend it with your own heuristics.
-
-Your job is to:
-1. Define features that matter in Connect 4 (territory, threats, removals, etc.)
-2. Score those features
-3. Combine them into an evaluation function
-4. Test different configurations and see what works best
+Each heuristic returns a numerical score that can be weighted and combined
+to create an overall position evaluation.
 """
 
 from .board import GameState
 
 
-class BasicEvaluator:
+# ============================================================================
+# HEURISTIC FUNCTIONS: Call these to evaluate different aspects of position
+# ============================================================================
+
+
+def terminal_state_bonus(state: GameState, player: int) -> float:
     """
-    A minimal baseline evaluator to make the code runnable.
+    Detect terminal states and return win/loss/draw bonus.
 
-    This is intentionally weak and should be replaced with your own heuristics.
+    If the game is over, returns a definitive score:
+    - 10000 if player won
+    - -10000 if player lost
+    - 0 if draw
+
+    If the game is not over, returns 0 (no bonus).
+
+    Args:
+        state: The game state.
+        player: The player to evaluate for.
+
+    Returns:
+        Terminal state score (0 if not terminal).
     """
+    if not state.is_terminal:
+        return 0
 
-    def evaluate(self, state: GameState, player: int) -> float:
-        """
-        Evaluate the position from the perspective of 'player'.
+    if state.winner == player:
+        return 10000
+    elif state.winner is not None:
+        return -10000
+    else:
+        return 0
 
-        Args:
-            state: The game state to evaluate.
-            player: The player we're evaluating for (0 or 1).
 
-        Returns:
-            A score. Higher = better for player, lower = worse for player.
-            Typically use large values (±1000) for wins/losses.
-        """
-        # Terminal states: immediate win/loss
-        if state.is_terminal:
-            if state.winner == player:
-                return 10000  # Big win bonus
-            elif state.winner is not None:
-                return -10000  # Big loss penalty
-            else:
-                return 0  # Draw
+def piece_count_advantage(state: GameState, player: int) -> float:
+    """
+    Evaluate piece count difference.
 
-        # Baseline: piece count advantage (minimal heuristic)
-        my_pieces = state.count_pieces(player)
-        opponent = 1 - player
-        opponent_pieces = state.count_pieces(opponent)
+    More pieces = more control and potential winning combinations.
 
-        piece_diff = my_pieces - opponent_pieces
+    Args:
+        state: The game state.
+        player: The player to evaluate for.
 
-        # Tiny preference for center (pieces in columns 2-4 vs edges)
-        center_bonus = self._center_control(state, player)
+    Returns:
+        The difference in piece counts (player's pieces - opponent's pieces).
+    """
+    my_pieces = state.count_pieces(player)
+    opponent_pieces = state.count_pieces(1 - player)
+    return my_pieces - opponent_pieces
 
-        return piece_diff * 10 + center_bonus
 
-    def _center_control(self, state: GameState, player: int) -> float:
-        """
-        Tiny bonus for having pieces in center columns (2, 3, 4).
+def center_control(state: GameState, player: int) -> float:
+    """
+    Evaluate control of center columns.
 
-        Not a strong heuristic, just a placeholder.
-        """
-        bonus = 0
-        for col in [2, 3, 4]:
-            for row in range(state.ROWS):
-                if state.get_cell(row, col) == player:
-                    bonus += 1
-        return bonus * 1  # Tiny weight
+    Center columns (2, 3, 4) offer more winning opportunities because
+    pieces placed there can form more potential 4-in-a-rows.
+
+    Args:
+        state: The game state.
+        player: The player to evaluate for.
+
+    Returns:
+        Count of player's pieces in center columns.
+    """
+    center_count = 0
+    for col in [2, 3, 4]:
+        for row in range(state.ROWS):
+            if state.get_cell(row, col) == player:
+                center_count += 1
+    return center_count
+
+
+def threat_detection(state: GameState, player: int) -> float:
+    """
+    Penalize positions where opponent can win next move.
+
+    If opponent has a winning move, you MUST block them or lose immediately.
+    This heuristic prioritizes defensive play.
+
+    Args:
+        state: The game state.
+        player: The player to evaluate for.
+
+    Returns:
+        Negative score proportional to opponent's winning threats.
+    """
+    opponent = 1 - player
+    opponent_threats = count_threats(state, opponent)
+    return -opponent_threats * 500
+
+
+def winning_chances(state: GameState, player: int) -> float:
+    """
+    Bonus for positions where player can win next move.
+
+    Multiple winning moves = player is in a strong position.
+
+    Args:
+        state: The game state.
+        player: The player to evaluate for.
+
+    Returns:
+        Positive score proportional to player's winning opportunities.
+    """
+    my_opportunities = count_winning_chances(state, player)
+    return my_opportunities * 400
+
+
+def removal_value(state: GameState, player: int) -> float:
+    """
+    Evaluate the remaining removal advantage.
+
+    More removals left = more flexibility and strategic options.
+
+    Args:
+        state: The game state.
+        player: The player to evaluate for.
+
+    Returns:
+        Score based on removal advantage.
+    """
+    removals_remaining = state.removals_remaining[player]
+    opponent_removals = state.removals_remaining[1 - player]
+    return (removals_remaining - opponent_removals) * 50
 
 
 # ============================================================================
-# STUDENT HEURISTICS: Add your evaluators below
+# HELPER FUNCTIONS: Used by heuristics above
 # ============================================================================
 
-class StudentEvaluator:
-    """
-    Evaluator with THREAT DETECTION heuristic.
-
-    This combines:
-    1. Piece count (from BasicEvaluator)
-    2. Center control (from BasicEvaluator)
-    3. THREAT DETECTION (new): Heavily penalizes positions where opponent can win next move
-
-    Threat detection is one of the most effective heuristics in Connect 4 because:
-    - If opponent has a winning move, you MUST stop them (or you lose immediately)
-    - By heavily penalizing threats, the bot prioritizes blocking
-    """
-
-    def evaluate(self, state: GameState, player: int) -> float:
-        """
-        Evaluate the position from the perspective of 'player'.
-
-        Uses BasicEvaluator as foundation + adds threat detection penalty.
-        """
-        # Terminal states: immediate win/loss
-        if state.is_terminal:
-            if state.winner == player:
-                return 10000  # Big win bonus
-            elif state.winner is not None:
-                return -10000  # Big loss penalty
-            else:
-                return 0  # Draw
-
-        # Start with basic features
-        my_pieces = state.count_pieces(player)
-        opponent = 1 - player
-        opponent_pieces = state.count_pieces(opponent)
-
-        piece_diff = my_pieces - opponent_pieces
-
-        # Center control bonus (from BasicEvaluator)
-        center_bonus = 0
-        for col in [2, 3, 4]:
-            for row in range(state.ROWS):
-                if state.get_cell(row, col) == player:
-                    center_bonus += 1
-
-        # NEW HEURISTIC: Threat detection
-        # Count how many ways opponent can win next move
-        opponent_threats = count_threats(state, opponent)
-        threat_penalty = opponent_threats * 500  # Heavy penalty for each threat
-
-        # Count player's own winning chances for next move (opportunity bonus)
-        my_opportunities = count_winning_chances(state, player)
-        opportunity_bonus = my_opportunities * 400  # Bonus for own winning moves
-
-        # Combine all features
-        score = (piece_diff * 10) + (center_bonus * 1) + opportunity_bonus - threat_penalty
-
-        return score
-
-
-# ============================================================================
-# HELPER FUNCTIONS (You may implement these to support your heuristics)
-# ============================================================================
 
 def count_threats(state: GameState, opponent: int) -> int:
     """
@@ -166,6 +171,35 @@ def count_threats(state: GameState, opponent: int) -> int:
                 state.set_cell(row, col, None)
 
     return threat_count
+
+
+def count_winning_chances(state: GameState, player: int) -> int:
+    """
+    Count how many ways 'player' can win in the next move.
+
+    High count = player is in a winning position (has multiple winning moves).
+
+    This works by checking each empty cell: if the player could place a piece there
+    and create 4-in-a-row, it counts as a winning chance.
+    """
+    chance_count = 0
+
+    # Check each cell on the board
+    for row in range(state.ROWS):
+        for col in range(state.COLS):
+            # Only check empty cells
+            if state.get_cell(row, col) is None:
+                # Temporarily place player's piece
+                state.set_cell(row, col, player)
+
+                # Check if this creates a 4-in-a-row for player
+                if _check_win_for_player(state, player):
+                    chance_count += 1
+
+                # Remove the temporary piece
+                state.set_cell(row, col, None)
+
+    return chance_count
 
 
 def _check_win_for_player(state: GameState, player: int) -> bool:
@@ -199,106 +233,3 @@ def _check_win_for_player(state: GameState, player: int) -> bool:
                 return True
 
     return False
-
-
-def count_winning_chances(state: GameState, player: int) -> int:
-    """
-    Count how many ways 'player' can win in the next move.
-
-    High count = player is in a winning position (has multiple winning moves).
-
-    This works by checking each empty cell: if the player could place a piece there
-    and create 4-in-a-row, it counts as a winning chance.
-    """
-    chance_count = 0
-
-    # Check each cell on the board
-    for row in range(state.ROWS):
-        for col in range(state.COLS):
-            # Only check empty cells
-            if state.get_cell(row, col) is None:
-                # Temporarily place player's piece
-                state.set_cell(row, col, player)
-
-                # Check if this creates a 4-in-a-row for player
-                if _check_win_for_player(state, player):
-                    chance_count += 1
-
-                # Remove the temporary piece
-                state.set_cell(row, col, None)
-
-    return chance_count
-
-
-def evaluate_piece_clustering(state: GameState, player: int) -> float:
-    """
-    Evaluate how well a player's pieces are clustered.
-
-    Pieces that are close together have more potential to form 4-in-a-row.
-
-    TODO: Implement if you want clustering heuristics.
-
-    Returns:
-        A score reflecting how well pieces are grouped.
-    """
-    # TODO: Calculate clustering score (e.g., average distance between ally pieces)
-    return 0.0
-
-
-def evaluate_column_strength(state: GameState, player: int) -> float:
-    """
-    Evaluate the column-by-column strength for a player.
-
-    Some columns might be "owned" (many pieces, few opponent pieces).
-
-    TODO: Implement if you want position-based heuristics.
-
-    Returns:
-        A score reflecting column control.
-    """
-    # TODO: Score each column based on piece composition
-    return 0.0
-
-
-def evaluate_removal_value(state: GameState, player: int) -> float:
-    """
-    Evaluate the value of removals still available.
-
-    More removals left = more flexibility = potentially better position.
-
-    TODO: Implement if you want removal-aware heuristics.
-
-    Returns:
-        A score reflecting removal availability.
-    """
-    # TODO: Factor in remaining removals for both players
-    removals_remaining = state.removals_remaining[player]
-    opponent_removals = state.removals_remaining[1 - player]
-    return (removals_remaining - opponent_removals) * 50
-
-
-# ============================================================================
-# EXPERIMENTATION NOTES
-# ============================================================================
-
-"""
-When you're ready to experiment:
-
-1. Create a new evaluator class (e.g., MyHeuristic1, MyHeuristic2, etc.)
-2. Implement evaluate() to score positions based on your ideas
-3. Use the experiment.py module to run many games and compare outcomes
-
-Example:
-    from connect4.heuristics import MyHeuristic1, MyHeuristic2
-    from connect4.bots import MinimaxBot
-    from connect4.experiment import Experiment
-
-    bot1 = MinimaxBot(evaluator=MyHeuristic1(), depth=5)
-    bot2 = MinimaxBot(evaluator=MyHeuristic2(), depth=5)
-
-    experiment = Experiment(bot1=bot1, bot2=bot2, num_games=20, seed=42)
-    results = experiment.run()
-    print(results)
-
-Track which features help and which hurt. Iterate!
-"""

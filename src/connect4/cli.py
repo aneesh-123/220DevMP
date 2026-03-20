@@ -10,7 +10,7 @@ Provides:
 
 from .board import GameState
 from .bots import MinimaxBot
-from .heuristics import BasicEvaluator, StudentEvaluator
+from .evaluators import BasicEvaluator, StudentEvaluator
 from .experiment import Experiment
 from .rules import get_legal_moves, apply_move
 
