@@ -81,12 +81,12 @@ class StudentEvaluator:
 
         # Combine with weights (adjust these to tune behavior)
         score = (
-            terminal_score * 1 +
-            piece_score * 10 +
-            center_score * 1 +
+            # terminal_score * 1 +
+            # piece_score * 4 +
+            # center_score * 1 +
             threat_score * 1 +
-            winning_score * 1 +
-            removal_score * 1
+            winning_score * 5 
+            # removal_score * 1
         )
 
         return score
