@@ -61,6 +61,8 @@ class Experiment:
         verbose: bool = False,
         seed: Optional[int] = None,
         alternate_starts: bool = True,
+        bot1_name: str = "",
+        bot2_name: str = "",
     ):
         """
         Initialize an experiment.
@@ -73,6 +75,8 @@ class Experiment:
             seed: Random seed for reproducibility.
             alternate_starts: If True, alternate who goes first each game.
                              If False, bot1 always goes first.
+            bot1_name: Display name for bot1.
+            bot2_name: Display name for bot2.
         """
         self.bot1 = bot1
         self.bot2 = bot2
@@ -80,6 +84,8 @@ class Experiment:
         self.verbose = verbose
         self.seed = seed
         self.alternate_starts = alternate_starts
+        self.bot1_name = bot1_name or str(bot1)
+        self.bot2_name = bot2_name or str(bot2)
 
         if seed is not None:
             random.seed(seed)
@@ -118,28 +124,28 @@ class Experiment:
                 draws += 1
 
             if self.verbose:
-                # Determine starting bot name
-                starter = str(self.bot1) if bot1_is_player0 else str(self.bot2)
+                starter = self.bot1_name if bot1_is_player0 else self.bot2_name
 
-                print(f"Game {game_num + 1}/{self.num_games}: ", end="")
                 if winner is None:
-                    print(f"Draw (started: {starter})")
+                    result_str = "Draw"
                 else:
                     winner_name = (
-                        str(self.bot1)
+                        self.bot1_name
                         if (winner == 0 and bot1_is_player0)
                         or (winner == 1 and not bot1_is_player0)
-                        else str(self.bot2)
+                        else self.bot2_name
                     )
-                    print(f"{winner_name} wins (started: {starter})")
+                    result_str = f"{winner_name} wins"
+
+                print(f"  Game {game_num + 1}/{self.num_games}: {result_str} (first move: {starter})")
 
         results = ExperimentResults(
             bot1_wins=bot1_wins,
             bot2_wins=bot2_wins,
             draws=draws,
             total_games=self.num_games,
-            bot1_name=str(self.bot1),
-            bot2_name=str(self.bot2),
+            bot1_name=self.bot1_name,
+            bot2_name=self.bot2_name,
         )
         return results
 

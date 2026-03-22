@@ -103,12 +103,12 @@ class GameState:
         lines.append("  | 0| 1| 2| 3| 4| 5| 6|")
 
         state_str = "\n".join(lines)
-        state_str += f"\n\nCurrent player: {self.current_player} ({'O' if self.current_player == 0 else 'X'})"
+        state_str += f"\n\nCurrent player: {'O' if self.current_player == 0 else 'X'}"
         state_str += f"\nRemovals remaining: {self.removals_remaining}"
 
         if self.is_terminal:
             if self.winner is not None:
-                state_str += f"\nGAME OVER: Player {self.winner} ({'O' if self.winner == 0 else 'X'}) wins!"
+                state_str += f"\nGAME OVER: Player {'O' if self.winner == 0 else 'X'} wins!"
             else:
                 state_str += "\nGAME OVER: Board is full."
 
