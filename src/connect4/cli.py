@@ -13,7 +13,9 @@ from typing import Dict, List, Tuple, Optional
 from .board import GameState
 from .bots import MinimaxBot
 from .evaluators import discover_evaluators
-from .experiment import Experiment
+from .test_evaluators import discover_test_evaluators
+from .board_states import load_board_states
+from .experiment import ExperimentSuite
 from .rules import get_legal_moves, apply_move
 
 
@@ -197,49 +199,6 @@ def watch_game(bot1, bot2, bot1_name: str, bot2_name: str):
     print("=" * 50)
 
 
-def run_experiment(bot1, bot2, bot1_name: str, bot2_name: str):
-    """Run a batch experiment comparing two bots."""
-    print("\n" + "=" * 50)
-    print("Experiment: Compare Two Bots")
-    print("=" * 50)
-    print(f"Bot 1: {bot1_name}")
-    print(f"Bot 2: {bot2_name}")
-    print()
-
-    num_games = input("How many games? (default 10): ").strip()
-    try:
-        num_games = int(num_games) if num_games else 10
-    except ValueError:
-        num_games = 10
-
-    print(f"\nRunning {num_games} games with alternating starts...")
-    print("(Same search depth, different heuristics)\n")
-
-    experiment = Experiment(
-        bot1=bot1,
-        bot2=bot2,
-        num_games=num_games,
-        verbose=True,
-        seed=42,
-        alternate_starts=True,
-        bot1_name=bot1_name,
-        bot2_name=bot2_name,
-    )
-
-    results = experiment.run()
-    print(results)
-
-    print()
-    print("INTERPRETATION:")
-    if results.bot2_wins > results.bot1_wins:
-        print(f"  {bot2_name} is stronger!")
-        print(f"    It won {results.bot2_wins} vs {results.bot1_wins} games")
-    elif results.bot1_wins > results.bot2_wins:
-        print(f"  {bot1_name} won more games ({results.bot1_wins} vs {results.bot2_wins})")
-    else:
-        print(f"  They tied ({results.bot1_wins} wins each)")
-
-
 def main():
     """Main CLI menu with dynamic evaluator loading."""
     evaluators = discover_evaluators()
@@ -254,7 +213,7 @@ def main():
         print("=" * 50)
         print("1. Play against a bot")
         print("2. Watch two bots play")
-        print("3. Compare two bots (experiment)")
+        print("3. Run experiment on a bot")
         print("4. Quit")
         print()
 
@@ -276,12 +235,24 @@ def main():
                 watch_game(bot1, bot2, name1, name2)
 
         elif choice == "3":
-            result = select_two_evaluators(evaluators, "Select two bots to compare")
+            result = select_evaluator(evaluators, "Select a bot to test")
             if result:
-                name1, eval1, name2, eval2 = result
-                bot1 = MinimaxBot(evaluator=eval1, depth=DEFAULT_DEPTH)
-                bot2 = MinimaxBot(evaluator=eval2, depth=DEFAULT_DEPTH)
-                run_experiment(bot1, bot2, name1, name2)
+                name, evaluator = result
+                test_evals = discover_test_evaluators()
+                board_states = load_board_states()
+                if not test_evals:
+                    print("No test evaluators found in test_evaluators/ folder.")
+                elif not board_states:
+                    print("No board states found in board_states/ folder.")
+                else:
+                    suite = ExperimentSuite(
+                        evaluator=evaluator,
+                        evaluator_name=name,
+                        test_evaluators=test_evals,
+                        board_states=board_states,
+                        depth=DEFAULT_DEPTH,
+                    )
+                    suite.run()
 
         elif choice == "4":
             print("Goodbye!")

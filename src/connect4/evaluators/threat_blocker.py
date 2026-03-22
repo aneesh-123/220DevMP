@@ -19,7 +19,7 @@ class ThreatBlockerEvaluator:
         terminal_score = terminal_state_bonus(state, player)
         threat_score = threat_detection(state, player)
 
-        score = terminal_score + threat_score * 10
+        score = terminal_score + threat_score * 5
 
         return score
 

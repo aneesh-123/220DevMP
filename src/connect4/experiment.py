@@ -1,187 +1,155 @@
 """
 Experiment runner for Connect 4.
 
-Allows running multiple games between two bots and collecting statistics.
+Includes:
+- play_one_game: Play a single game between two bots from a given state.
+- ExperimentSuite: Run a student evaluator against all test evaluators
+  across all board states.
 """
 
-import random
-from dataclasses import dataclass
-from typing import Optional, Any
+from typing import Optional, Any, List, Tuple, Dict
 from .board import GameState
+from .bots import MinimaxBot
 from .rules import get_legal_moves, apply_move
 
 
-@dataclass
-class ExperimentResults:
+def play_one_game(
+    bot_a: MinimaxBot,
+    bot_b: MinimaxBot,
+    initial_state: Optional[GameState] = None,
+) -> Optional[int]:
     """
-    Results from running a batch of games.
+    Play a single game and return the winner.
 
-    Attributes:
-        bot1_wins: Number of games won by bot1.
-        bot2_wins: Number of games won by bot2.
-        draws: Number of games that ended in a draw (board full).
-        total_games: Total number of games played.
-        bot1_name: Name of bot1.
-        bot2_name: Name of bot2.
+    bot_a plays as player 0 (whoever current_player is in initial_state).
+    bot_b plays as player 1.
+
+    Returns:
+        Winner (0 or 1) or None if draw.
     """
+    state = initial_state.copy() if initial_state else GameState()
 
-    bot1_wins: int
-    bot2_wins: int
-    draws: int
-    total_games: int
-    bot1_name: str
-    bot2_name: str
+    while not state.is_terminal:
+        legal_moves = get_legal_moves(state)
+        if not legal_moves:
+            break
 
-    def __str__(self) -> str:
-        lines = [
-            f"\n{'=' * 50}",
-            f"Experiment Results",
-            f"{'=' * 50}",
-            f"{self.bot1_name} vs {self.bot2_name}",
-            f"Total games: {self.total_games}",
-            f"",
-            f"{self.bot1_name:20} wins: {self.bot1_wins}  ({100*self.bot1_wins/self.total_games:.1f}%)",
-            f"{self.bot2_name:20} wins: {self.bot2_wins}  ({100*self.bot2_wins/self.total_games:.1f}%)",
-            f"{'Draws':20}: {self.draws}  ({100*self.draws/self.total_games:.1f}%)",
-            f"{'=' * 50}",
-        ]
-        return "\n".join(lines)
+        if state.current_player == 0:
+            move = bot_a.choose_move(state)
+        else:
+            move = bot_b.choose_move(state)
+
+        if move is None:
+            break
+
+        state = apply_move(state, move)
+
+    return state.winner
 
 
-class Experiment:
+class ExperimentSuite:
     """
-    Run a series of games between two bots and collect statistics.
+    Run a student evaluator against all test evaluators on all board states.
+
+    For each (test_evaluator, board_state) pair, plays 2 games:
+    one with the student going first, one with the opponent going first.
     """
 
     def __init__(
         self,
-        bot1: Any,
-        bot2: Any,
-        num_games: int = 10,
-        verbose: bool = False,
-        seed: Optional[int] = None,
-        alternate_starts: bool = True,
-        bot1_name: str = "",
-        bot2_name: str = "",
+        evaluator: Any,
+        evaluator_name: str,
+        test_evaluators: Dict[str, Any],
+        board_states: List[Tuple[str, GameState]],
+        depth: int = 4,
     ):
-        """
-        Initialize an experiment.
+        self.evaluator = evaluator
+        self.evaluator_name = evaluator_name
+        self.test_evaluators = test_evaluators
+        self.board_states = board_states
+        self.depth = depth
 
-        Args:
-            bot1: The first bot object.
-            bot2: The second bot object.
-            num_games: Number of games to play.
-            verbose: If True, print progress updates.
-            seed: Random seed for reproducibility.
-            alternate_starts: If True, alternate who goes first each game.
-                             If False, bot1 always goes first.
-            bot1_name: Display name for bot1.
-            bot2_name: Display name for bot2.
-        """
-        self.bot1 = bot1
-        self.bot2 = bot2
-        self.num_games = num_games
-        self.verbose = verbose
-        self.seed = seed
-        self.alternate_starts = alternate_starts
-        self.bot1_name = bot1_name or str(bot1)
-        self.bot2_name = bot2_name or str(bot2)
+    def run(self):
+        """Run all matches and print results in real-time."""
+        num_opponents = len(self.test_evaluators)
+        num_boards = len(self.board_states)
+        total_games = num_opponents * num_boards * 2
 
-        if seed is not None:
-            random.seed(seed)
+        print(f"\nTesting: {self.evaluator_name}")
+        print(f"{num_opponents} opponents x {num_boards} board states x 2 sides = {total_games} games")
+        print("=" * 60)
 
-    def run(self) -> ExperimentResults:
-        """
-        Run the experiment: play num_games games and return results.
+        student_bot = MinimaxBot(evaluator=self.evaluator, depth=self.depth)
 
-        Returns:
-            ExperimentResults with win/draw counts.
-        """
-        bot1_wins = 0
-        bot2_wins = 0
-        draws = 0
+        # Track per-opponent results
+        opponent_results = {}
+        total_wins = 0
+        total_losses = 0
+        total_draws = 0
+        game_number = 0
 
-        for game_num in range(self.num_games):
-            # Decide who goes first
-            if self.alternate_starts:
-                bot1_is_player0 = (game_num % 2 == 0)
-            else:
-                bot1_is_player0 = True
+        for opp_name, opp_evaluator in self.test_evaluators.items():
+            opp_bot = MinimaxBot(evaluator=opp_evaluator, depth=self.depth)
+            opp_wins = 0
+            opp_losses = 0
+            opp_draws = 0
 
-            winner = self._play_one_game(bot1_is_player0)
+            print(f"\n  vs {opp_name}:")
 
-            if winner == 0:
-                if bot1_is_player0:
-                    bot1_wins += 1
-                else:
-                    bot2_wins += 1
-            elif winner == 1:
-                if bot1_is_player0:
-                    bot2_wins += 1
-                else:
-                    bot1_wins += 1
-            else:
-                draws += 1
+            for board_name, board_state in self.board_states:
+                results = []
 
-            if self.verbose:
-                starter = self.bot1_name if bot1_is_player0 else self.bot2_name
+                for student_goes_first in [True, False]:
+                    game_number += 1
+                    side = "O" if student_goes_first else "X"
 
-                if winner is None:
-                    result_str = "Draw"
-                else:
-                    winner_name = (
-                        self.bot1_name
-                        if (winner == 0 and bot1_is_player0)
-                        or (winner == 1 and not bot1_is_player0)
-                        else self.bot2_name
-                    )
-                    result_str = f"{winner_name} wins"
+                    if student_goes_first:
+                        winner = play_one_game(student_bot, opp_bot, board_state)
+                        student_won = (winner == 0)
+                        opp_won = (winner == 1)
+                    else:
+                        winner = play_one_game(opp_bot, student_bot, board_state)
+                        student_won = (winner == 1)
+                        opp_won = (winner == 0)
 
-                print(f"  Game {game_num + 1}/{self.num_games}: {result_str} (first move: {starter})")
+                    if student_won:
+                        results.append(f"Win as {side}")
+                        opp_wins += 1
+                    elif opp_won:
+                        results.append(f"Loss as {side}")
+                        opp_losses += 1
+                    else:
+                        results.append(f"Draw as {side}")
+                        opp_draws += 1
 
-        results = ExperimentResults(
-            bot1_wins=bot1_wins,
-            bot2_wins=bot2_wins,
-            draws=draws,
-            total_games=self.num_games,
-            bot1_name=self.bot1_name,
-            bot2_name=self.bot2_name,
-        )
-        return results
+                print(f"    {board_name}: {results[0]}, {results[1]}")
 
-    def _play_one_game(self, bot1_is_player0: bool) -> Optional[int]:
-        """
-        Play a single game and return the winner (0, 1) or None for draw.
+            total_wins += opp_wins
+            total_losses += opp_losses
+            total_draws += opp_draws
+            opp_total = opp_wins + opp_losses + opp_draws
+            opp_pct = 100 * opp_wins / opp_total if opp_total else 0
+            opponent_results[opp_name] = (opp_wins, opp_losses, opp_draws)
+            print(f"    Subtotal: W:{opp_wins} L:{opp_losses} D:{opp_draws} ({opp_pct:.0f}% wins)")
 
-        Args:
-            bot1_is_player0: If True, bot1 is player 0; else bot1 is player 1.
+        # Final summary
+        print("\n" + "=" * 60)
+        print(f"EXPERIMENT RESULTS: {self.evaluator_name}")
+        print("=" * 60)
 
-        Returns:
-            Winner (0 or 1) or None if draw.
-        """
-        state = GameState()
+        for opp_name, (w, l, d) in opponent_results.items():
+            opp_total = w + l + d
+            pct = 100 * w / opp_total if opp_total else 0
+            print(f"  vs {opp_name:20s}  W:{w:2d}  L:{l:2d}  D:{d:2d}  ({pct:.0f}%)")
 
-        while not state.is_terminal:
-            legal_moves = get_legal_moves(state)
-            if not legal_moves:
-                # No moves available (shouldn't happen in Connect 4)
-                break
+        print("-" * 60)
+        grand_total = total_wins + total_losses + total_draws
+        win_pct = 100 * total_wins / grand_total if grand_total else 0
+        print(f"  {'TOTAL':23s}  W:{total_wins:2d}  L:{total_losses:2d}  D:{total_draws:2d}  ({win_pct:.0f}%)")
+        print("=" * 60)
 
-            # Determine which bot plays this turn
-            if state.current_player == 0:
-                if bot1_is_player0:
-                    move = self.bot1.choose_move(state)
-                else:
-                    move = self.bot2.choose_move(state)
-            else:
-                if bot1_is_player0:
-                    move = self.bot2.choose_move(state)
-                else:
-                    move = self.bot1.choose_move(state)
-
-            if move is None:
-                break
-
-            state = apply_move(state, move)
-
-        return state.winner
+        print(f"\nGRADE GUIDE:")
+        print(f"  70%+ win rate: Excellent heuristic design")
+        print(f"  50%+ win rate: Good heuristic design")
+        print(f"  30%+ win rate: Needs improvement")
+        print(f"  <30% win rate: Significant issues")
