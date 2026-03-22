@@ -23,7 +23,9 @@ DEFAULT_DEPTH = 4
 
 
 def select_evaluator(
-    evaluators: Dict[str, object], prompt: str = "Select an evaluator"
+    evaluators: Dict[str, object],
+    prompt: str = "Select an evaluator",
+    cancel_first: bool = False,
 ) -> Optional[Tuple[str, object]]:
     """Show available evaluators and let user select one."""
     eval_list = list(evaluators.items())
@@ -32,9 +34,12 @@ def select_evaluator(
         return None
 
     print(f"\n{prompt}:")
+    if cancel_first:
+        print("  0. Cancel")
     for i, (name, _) in enumerate(eval_list, 1):
         print(f"  {i}. {name}")
-    print(f"  0. Cancel")
+    if not cancel_first:
+        print("  0. Cancel")
 
     try:
         choice = int(input("\nEnter choice: ").strip())
@@ -235,7 +240,11 @@ def main():
                 watch_game(bot1, bot2, name1, name2)
 
         elif choice == "3":
-            result = select_evaluator(evaluators, "Select a bot to test")
+            result = select_evaluator(
+                evaluators,
+                "Select a bot to test",
+                cancel_first=True,
+            )
             if result:
                 name, evaluator = result
                 test_evals = discover_test_evaluators()
