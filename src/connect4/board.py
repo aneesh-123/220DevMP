@@ -88,9 +88,8 @@ class GameState:
     def display(self) -> str:
         """Return a string representation of the board for printing."""
         lines = []
-        for row_idx, row in enumerate(self.board):
-            row_label = str(self.ROWS - 1 - row_idx)
-            row_str = row_label + " |"
+        for row in self.board:
+            row_str = "|"
             for cell in row:
                 if cell is None:
                     row_str += " .|"
@@ -99,8 +98,8 @@ class GameState:
                 else:
                     row_str += " X|"
             lines.append(row_str)
-        lines.append("  +--+--+--+--+--+--+--+")
-        lines.append("  | 0| 1| 2| 3| 4| 5| 6|")
+        lines.append("+--+--+--+--+--+--+--+")
+        lines.append("| 0| 1| 2| 3| 4| 5| 6|")
 
         state_str = "\n".join(lines)
         state_str += f"\n\nCurrent player: {self.current_player} ({'O' if self.current_player == 0 else 'X'})"
