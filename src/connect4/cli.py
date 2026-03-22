@@ -35,12 +35,12 @@ def play_interactive_game(bot, bot_name: str):
     """
     state = GameState()
 
-    print("\n" + state.display())
     print(f"\nYou are player 0 (O). Playing against {bot_name}.")
     print("Commands:")
     print("  place <column>    - Drop a piece in column (0-6)")
     print("  remove <row> <col> - Remove piece at (row, col)")
     print("  quit              - Exit game")
+    print("\n" + state.display())
     print()
 
     while not state.is_terminal:
