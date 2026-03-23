@@ -1,7 +1,7 @@
 """
 Utility to generate valid random board states for experiments.
 
-Run directly: python -m src.connect4.board_generator
+Run directly: python -m connect4.board_generator
 """
 
 import json

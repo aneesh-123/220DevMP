@@ -1,8 +1,8 @@
 """
-Test evaluator discovery for Connect 4 experiments.
+Evaluator discovery for Connect 4.
 
-Each .py file in this folder defines an EVALUATOR instance used as
-an opponent when benchmarking student evaluators.
+Each .py file in this folder defines an EVALUATOR instance.
+They are automatically discovered and made available in the CLI.
 """
 
 import importlib
@@ -12,9 +12,12 @@ from pathlib import Path
 from typing import Dict
 
 
-def discover_test_evaluators() -> Dict[str, object]:
+def discover_evaluators() -> Dict[str, object]:
     """
-    Dynamically load all test evaluators from this folder.
+    Dynamically load all evaluators from this folder.
+
+    Each evaluator file must define an EVALUATOR variable (an instance
+    with an evaluate(state, player) method and a __repr__ for display).
 
     Returns:
         Dictionary of {display_name: evaluator_instance}.
@@ -22,7 +25,8 @@ def discover_test_evaluators() -> Dict[str, object]:
     evaluators = {}
     eval_dir = Path(__file__).parent
 
-    project_root = Path(__file__).parent.parent.parent.parent
+    # Ensure project root is in sys.path for imports
+    project_root = Path(__file__).parent.parent.parent
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
 
@@ -33,7 +37,7 @@ def discover_test_evaluators() -> Dict[str, object]:
         module_name = eval_file.stem
         try:
             spec = importlib.util.spec_from_file_location(
-                f"src.connect4.test_evaluators.{module_name}",
+                f"connect4.evaluators.{module_name}",
                 eval_file,
             )
             if spec and spec.loader:
@@ -46,6 +50,6 @@ def discover_test_evaluators() -> Dict[str, object]:
                     name = repr(evaluator)
                     evaluators[name] = evaluator
         except Exception as e:
-            print(f"Warning: Could not load test evaluator from {eval_file.name}: {e}")
+            print(f"Warning: Could not load evaluator from {eval_file.name}: {e}")
 
     return evaluators

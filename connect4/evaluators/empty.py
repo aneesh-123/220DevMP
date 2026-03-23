@@ -1,12 +1,12 @@
 """
 Starter evaluator for student heuristic design.
 
-Add reusable heuristic helper functions in src/connect4/heuristics.py,
+Add reusable heuristic helper functions in connect4/heuristics.py,
 then combine them here to build a stronger evaluator.
 """
 
-from src.connect4.board import GameState
-from src.connect4.heuristics import terminal_state_bonus
+from ..board import GameState
+from ..heuristics import terminal_state_bonus
 
 
 class RandomEvaluator:
