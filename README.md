@@ -1,215 +1,218 @@
-# Connect 4 with Removals: AI Heuristic Design Project
+# Connect 4 With Removals: Heuristic Design Project
 
-## Overview
+## Your Goal
 
-This is a modified Connect 4 game designed as an educational project focused on **heuristic evaluation function design and experimentation**.
+Your job is to build a stronger Connect 4 bot by designing a better evaluation function.
 
-The project provides:
-- ✅ A complete, working game engine
-- ✅ Move generation and legality checking
-- ✅ Minimax with alpha-beta pruning search
-- ✅ Bot infrastructure and runner framework
-- ❌ **Sophisticated heuristics** (you implement these!)
+The search algorithm, game rules, and command-line interface are already implemented for you. You are **not** writing minimax or alpha-beta pruning. Instead, you will:
 
-The goal is for students to focus on **designing, implementing, and testing evaluation functions** rather than building game mechanics or search algorithms from scratch.
+1. Research useful heuristics for Connect 4.
+2. Adapt those heuristics to this version of the game, where each player has **one removal move**.
+3. Implement reusable heuristic helper functions.
+4. Combine those heuristics into an evaluator.
+5. Create your own test evaluators and board states.
+6. Run experiments, analyze the results, and improve your bot.
 
-## Modified Rules
+## Game Variant
 
-Standard Connect 4 with an added twist: **Removal Moves**
+This project uses a modified version of Connect 4:
 
-### Basic Rules
-- 6 rows × 7 columns board
-- Players alternate turns (player 0 and player 1)
-- Normal move: drop a piece into a non-full column
-- Win condition: 4 in a row (horizontal, vertical, or diagonal)
-- Game ends immediately upon win
+- Players can place pieces as usual.
+- Each player also has **one removal** available during the game.
+- A strong evaluator should consider both normal Connect 4 strategy and the effect of the one-time removal mechanic.
 
-### The Removal Rule (Modified)
-- Each player has **exactly 2 removal moves per game**
-- On your turn, instead of placing a piece, you may **remove any occupied piece** from the board
-- After removal, gravity applies: pieces above the gap fall downward
-- Removals count as your turn and decrement your removal count
-- A removal can win instantly if it creates a 4-in-a-row (rare edge case)
+That means your heuristics should not only look at patterns like threats, center control, and winning opportunities, but also at how removals change the value of a position.
 
-## Project Structure
+## What You Should Edit
 
+You should only work in these locations:
+
+- `src/connect4/heuristics.py`
+- `src/connect4/evaluators/`
+- `src/connect4/test_evaluators/`
+- `src/connect4/board_states/`
+
+You should **not** modify any other files in the project.
+
+In particular, do **not** change:
+
+- `search.py`
+- `rules.py`
+- `cli.py`
+- `board.py`
+- `bots.py`
+- `experiment.py`
+- any other infrastructure files outside the four locations listed above
+
+Your work for this project should stay within `heuristics.py`, the `evaluators` folder, the `test_evaluators` folder, and the `board_states` folder.
+
+## Main Tasks
+
+### 1. Add Heuristic Functions
+
+In `src/connect4/heuristics.py`, write reusable helper functions that each evaluate one aspect of a board position.
+
+Any heuristic used by any evaluator in this project should be implemented in `src/connect4/heuristics.py`.
+
+An example heuristic is already provided for you as a reference. Use that example to follow the expected style: one helper function per heuristic, each returning a numerical score.
+
+Examples of possible heuristics:
+
+- terminal win/loss bonus
+- center control
+- immediate winning moves
+- opponent threats
+- streaks of length 2 or 3
+- removal advantage
+- positions that become strong or weak after a removal
+
+Each heuristic should return a numerical score.
+
+## 2. Build Your Evaluator
+
+In `src/connect4/evaluators/`, combine your heuristic functions into evaluator files.
+
+Important:
+
+- Every new evaluator you create should be placed in its **own separate `.py` file** inside `src/connect4/evaluators/`.
+- Do not put multiple evaluators in one file unless there is a specific reason to do so.
+- The provided `empty.py` file is a baseline example and a starting point.
+
+Your evaluator should:
+
+- call the helper functions from `heuristics.py`
+- combine them into one final score
+- return higher scores for positions that are better for the given player
+
+The provided `Empty` evaluator is only a baseline. You are expected to improve it or create additional evaluator files as you experiment.
+
+## 3. Create Test Evaluators
+
+In `src/connect4/test_evaluators/`, add your own evaluator files to use as opponents during experiments.
+
+Important:
+
+- Each `.py` file in this folder is automatically discovered.
+- Each file must define an `EVALUATOR` object.
+- That evaluator must have an `evaluate(state, player)` method.
+- It should also have a `__repr__()` so it displays nicely in the CLI.
+
+These test evaluators do not need to be perfect. Their purpose is to give you different kinds of opponents so you can test whether your heuristics actually help.
+
+## 4. Create Board States
+
+In `src/connect4/board_states/`, add your own `.json` files representing interesting starting positions.
+
+These board states should help you test specific situations, such as:
+
+- immediate win opportunities
+- positions where a block is required
+- positions where a removal changes the best move
+- positions where one player has strong center control
+- near-endgame states
+
+The experiment runner automatically loads every `.json` board state in this folder.
+
+## 5. Run Experiments and Iterate
+
+Use the experiment mode to test your evaluator against the available test evaluators on all available board states.
+
+Your goal is not just to write heuristics once. Your goal is to:
+
+- test them
+- see what works
+- identify weaknesses
+- revise your evaluator
+- test again
+
+You should expect to go through multiple versions before arriving at your final evaluator.
+
+## How The Project Is Structured
+
+You are given the following infrastructure:
+
+- `src/connect4/search.py`: minimax with alpha-beta pruning
+- `src/connect4/rules.py`: legal moves and game rules
+- `src/connect4/cli.py`: command-line interface
+- `src/connect4/experiment.py`: experiment runner
+
+This means the main intellectual work is heuristic design and experimental evaluation.
+
+## Running The Project
+
+From the project root, run:
+
+```powershell
+python -m src.connect4.cli
 ```
-.
-├── README.md
-├── requirements.txt
-├── src/
-│   └── connect4/
-│       ├── __init__.py
-│       ├── board.py           # Board state and display
-│       ├── moves.py           # Move types (Placement, Removal)
-│       ├── rules.py           # Game logic, move legality, win detection
-│       ├── search.py          # Minimax with alpha-beta pruning
-│       ├── bots.py            # Bot interfaces and implementations
-│       ├── heuristics.py       # ⭐ STUDENT WORK: Evaluation functions
-│       ├── experiment.py       # Batch game runner for experiments
-│       └── cli.py             # Simple runner scripts
-└── tests/
-    ├── test_board.py
-    ├── test_moves.py
-    ├── test_removals.py
-    ├── test_win_detection.py
-    └── test_search.py
-```
 
-## What's Provided
+You will see a menu with options to:
 
-### Infrastructure (You Don't Need to Touch)
-- **`board.py`**: Board representation, state management
-- **`moves.py`**: Move abstractions (PlacementMove, RemovalMove)
-- **`rules.py`**: All game rules, move legality, win detection, gravity logic
-- **`search.py`**: Minimax + alpha-beta pruning implementation
-- **`bots.py`**: MinimaxBot interface
-- **`experiment.py`**: Framework for running experiments and collecting statistics
-- **`cli.py`**: Simple runner for common scenarios
-- **`tests/`**: Comprehensive test suite
+- play against a bot
+- watch two bots play
+- run experiments on a bot
 
-### Your Work (Heuristics)
-- **`heuristics.py`**: This is where you implement evaluation functions!
+Use the experiment option to compare your evaluator against your test evaluators across your board states.
 
-## Where to Implement Heuristics
+## File Conventions
 
-The `heuristics.py` file contains skeleton classes and functions with TODO markers.
+### Evaluators
 
-### Current Baseline
-A minimal `BasicEvaluator` exists to make the code run, but it is intentionally weak:
-- Detects wins (very high score) and losses (very low score)
-- Minimal piece count difference
-- No strategic features
+Files in `src/connect4/evaluators/` and `src/connect4/test_evaluators/` are auto-discovered.
 
-### Your Task
-Replace or extend the evaluation function with smarter heuristics. Examples of features you might explore:
-- Piece count and distribution
-- Threat detection (opponent's one-move wins)
-- Defensive opportunities (blocking opponent threats)
-- Center control
-- Cluster formation
-- Removal move value and fragility
-- Endgame patterns
-- And more!
+Each evaluator should be in its own separate file.
 
-See `heuristics.py` for placeholder function skeletons and detailed comments.
-
-## Running the Code
-
-### Installation
-```bash
-cd src
-# No external dependencies required!
-```
-
-### Playing Bot vs Bot
+Each evaluator file should define:
 
 ```python
-from connect4.cli import main
-main()
-
-# Or from command line:
-python -m connect4.cli
+EVALUATOR = YourEvaluatorClass()
 ```
 
-### Running Experiments
+### Board States
 
-```python
-from connect4.experiment import Experiment
-from connect4.bots import MinimaxBot
-from connect4.heuristics import BasicEvaluator
+Files in `src/connect4/board_states/` should be JSON files. Each file should contain a board configuration and can also include:
 
-# Run 10 games: MinimaxBot with BasicEvaluator vs another evaluator
-bot1 = MinimaxBot(evaluator=BasicEvaluator(), depth=5)
-bot2 = MinimaxBot(evaluator=BasicEvaluator(), depth=5)
+- `name`
+- `current_player`
+- `removals_remaining`
 
-experiment = Experiment(
-    bot1=bot1,
-    bot2=bot2,
-    num_games=10,
-    verbose=True,
-    seed=42
-)
-results = experiment.run()
-print(results)
-```
+Only valid board states will load.
 
-### Running Tests
+## What A Good Submission Looks Like
 
-```bash
-cd src
-python -m pytest ../tests -v
-```
+A strong submission will include:
 
-## Key Classes and Interfaces
+- several distinct heuristic helper functions
+- a final evaluator that combines them thoughtfully
+- multiple custom test evaluators
+- multiple custom board states
+- evidence that you tested and improved your evaluator over time
 
-### Move Types
-```python
-from connect4.moves import PlacementMove, RemovalMove
+## What You Should Be Able To Explain
 
-move = PlacementMove(column=3)
-move = RemovalMove(row=2, col=4)
-```
+By the end of the project, you should be able to explain:
 
-### Game State
-```python
-from connect4.board import GameState
+- which heuristics you implemented
+- why you thought each heuristic would help
+- how the one-removal rule affected your design
+- what kinds of test positions you created and why
+- what changed between your early and final versions
+- what evidence suggests your final evaluator is better than your baseline
 
-state = GameState()
-print(state.current_player)       # 0 or 1
-print(state.removals_remaining)   # [3, 3]
-print(state.is_terminal)          # bool
-print(state.winner)               # None, 0, or 1
-```
+## Submission Checklist
 
-### Bots
-```python
-from connect4.bots import MinimaxBot
-from connect4.heuristics import BasicEvaluator
+Before submitting, make sure you have:
 
-# Minimax bot with your evaluator
-evaluator = BasicEvaluator()
-bot = MinimaxBot(evaluator=evaluator, depth=5)
+- added heuristic helper functions in `src/connect4/heuristics.py`
+- kept all heuristics in `src/connect4/heuristics.py`
+- created or updated evaluator files in `src/connect4/evaluators/`
+- added your own files to `src/connect4/test_evaluators/`
+- added your own files to `src/connect4/board_states/`
+- run experiments on your evaluator
+- revised your evaluator based on results
 
-# Get a move
-move = bot.choose_move(state)
-```
+## Summary
 
-### Evaluator Interface
-```python
-class MyEvaluator:
-    def evaluate(self, state: GameState, player: int) -> float:
-        """
-        Return a score for the given state from player's perspective.
-        Positive = good for player, Negative = bad for player.
-        """
-        # Your heuristic logic here
-        return score
-```
+This is an AI design project, not a search implementation project.
 
-## Suggested Workflow
-
-1. **Understand the game**: Read the rules and run the CLI
-2. **Study the provided code**: Explore `search.py`, `rules.py`, `board.py`
-3. **Read `heuristics.py`**: See the skeleton and TODOs
-4. **Implement a simple evaluator**: Start with one or two features
-5. **Run experiments**: Compare different evaluators at different depths
-6. **Iterate**: Add features, test, analyze win rates and game patterns
-7. **Analyze results**: Which features help? Which hurt? When?
-
-## Tips
-
-- Start with simple heuristics (piece count, center control)
-- Use `Experiment` to run many games and see patterns
-- Think about what features matter in the endgame vs. midgame
-- Consider how removals change strategy
-- Write multiple evaluators and compare them
-- Use fixed seeds (`seed=42`) for reproducible experiments
-
-## Educational Note
-
-This project is designed so that **search and game mechanics are provided**, allowing you to focus entirely on the most interesting part: **designing evaluation functions that guide a strong AI**.
-
-The quality of your heuristics determines how well your bot plays. A deeper search with a weak evaluator will still lose to shallow search with great heuristics.
-
-Good luck! 🚀
+You are being asked to design a better heuristic bot for Connect 4 with one removal per player, test it carefully, and improve it based on evidence.
