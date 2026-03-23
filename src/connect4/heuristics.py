@@ -1,3 +1,5 @@
+"""Reusable heuristic helper functions for evaluator design."""
+
 from .board import GameState
 
 
