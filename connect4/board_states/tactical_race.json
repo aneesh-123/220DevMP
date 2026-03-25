@@ -1,0 +1,13 @@
+{
+  "name": "Tactical Race",
+  "current_player": 0,
+  "removals_remaining": [0, 0],
+  "board": [
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [1, null, null, 0, null, 0, null],
+    [0, null, 1, 1, null, 1, null],
+    [0, 0, 0, 1, 1, 1, 0]
+  ]
+}

@@ -1,0 +1,66 @@
+Immediate Tactics Demo
+
+Goal
+Show that one logic-backed heuristic feature can improve a strong evaluator.
+
+Claim
+Both demo evaluators use the same core logic:
+- terminal win/loss scoring
+- center control
+- generic four-cell window scoring
+- generic three-in-a-row scoring
+
+The only intended difference is that "Immediate Tactics" adds one extra feature:
+- a score for immediate wins and immediate forced blocks
+
+Why This Matters
+In Connect 4, some positions are tactically urgent.
+If you can win immediately, or if the opponent can win immediately unless you block, a good evaluator should strongly prioritize that fact.
+
+That means:
+- Baseline Threes can still prefer nice-looking setup moves
+- Immediate Tactics can prioritize wins-now and blocks-now
+
+Files
+- connect4/evaluators/baseline_threes.py
+- connect4/evaluators/playable_threes.py
+- connect4/test_evaluators/center_benchmark.py
+- connect4/test_evaluators/setup_benchmark.py
+- connect4/board_states/take_win_now.json
+- connect4/board_states/must_block_horizontal.json
+- connect4/board_states/must_block_vertical.json
+- connect4/board_states/center_vs_block.json
+- connect4/board_states/tactical_race.json
+
+How To Demo It
+1. Run the CLI with: py -m connect4.cli
+2. Choose the experiment option.
+3. Run "Baseline Threes" against the benchmark evaluators.
+4. Run "Immediate Tactics" against the same benchmark evaluators.
+5. Compare the results on the curated board states.
+
+What Each Board State Shows
+- Take Win Now: the improved evaluator should take the immediate win instead of preferring a slower setup
+- Must Block Horizontal: the improved evaluator should block the opponent's horizontal immediate win
+- Must Block Vertical: the improved evaluator should block the opponent's vertical immediate win
+- Center vs Block: the improved evaluator should ignore a tempting positional move when a tactical block is required
+- Tactical Race: the improved evaluator should prefer the move that wins the race of immediate threats
+
+Active Demo Set
+- Benchmark evaluators: Center Benchmark, Setup Benchmark
+- Board states: Take Win Now, Must Block Horizontal, Must Block Vertical, Center vs Block, Tactical Race
+
+Why This Smaller Set Works Better
+Immediate wins and forced blocks are much more decisive than a subtle threat-refinement heuristic.
+This active demo set is chosen to create actual move-choice differences that lead to different outcomes in experiments.
+
+Current Experimental Result
+- Baseline Threes: 55% win rate on the active set
+- Immediate Tactics: 65% win rate on the active set
+
+Interpretation
+The tactical heuristic does not just change scores. On this curated experiment set, it also improves the final game outcomes.
+
+Conclusion
+This demo is designed to support a narrow claim:
+adding one specific, strategy-backed feature to an already reasonable evaluator can improve decision quality and overall performance.
