@@ -15,7 +15,7 @@ class MinimaxBot:
     The bot's strength is determined by the evaluation function quality.
     """
 
-    def __init__(self, evaluator, depth: int = 5):
+    def __init__(self, evaluator, depth: int = 4):
         """
         Initialize a minimax bot.
 

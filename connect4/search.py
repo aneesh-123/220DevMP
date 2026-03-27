@@ -33,6 +33,7 @@ def minimax(
     state: GameState,
     depth: int,
     evaluator: Any,
+    root_player: int,
     maximizing: bool = True,
     alpha: float = float('-inf'),
     beta: float = float('inf'),
@@ -44,6 +45,7 @@ def minimax(
         state: The current game state.
         depth: How many moves ahead to search. 0 means use evaluator on current state.
         evaluator: An object with an evaluate(state, player) method.
+        root_player: The player whose perspective all leaf scores use.
         maximizing: True if we're maximizing (searching for the root player's move).
         alpha: Alpha pruning threshold.
         beta: Beta pruning threshold.
@@ -55,13 +57,11 @@ def minimax(
     """
     # Terminal node: evaluate the position
     if depth == 0 or state.is_terminal:
-        root_player = state.current_player
         score = evaluator.evaluate(state, root_player)
         return None, score
 
     legal_moves = get_legal_moves(state)
     if not legal_moves:
-        root_player = state.current_player
         score = evaluator.evaluate(state, root_player)
         return None, score
 
@@ -75,6 +75,7 @@ def minimax(
                 next_state,
                 depth - 1,
                 evaluator,
+                root_player,
                 maximizing=False,
                 alpha=alpha,
                 beta=beta,
@@ -94,6 +95,7 @@ def minimax(
                 next_state,
                 depth - 1,
                 evaluator,
+                root_player,
                 maximizing=True,
                 alpha=alpha,
                 beta=beta,
@@ -123,10 +125,12 @@ def search(
     Returns:
         SearchResult with best_move, score, and depth_searched.
     """
+    root_player = state.current_player
     best_move, score = minimax(
         state,
         depth,
         evaluator,
+        root_player,
         maximizing=True,
         alpha=float('-inf'),
         beta=float('inf'),
