@@ -1,97 +1,160 @@
-# Connect 4 With Removals
+# Connect 4 with Removals — AI Heuristic Design
 
 ## What This Game Is
 
-This project uses a modified version of Connect 4.
+A modified Connect 4 where each player also has **one removal move** per game.
+Players take turns dropping pieces into columns to make 4 in a row (horizontal, vertical, or diagonal).
+The removal adds a strategic twist: you can pull any piece off the board (gravity applies to pieces above).
 
-- Players normally take turns dropping pieces into columns.
-- The goal is to make 4 in a row horizontally, vertically, or diagonally.
-- In this version, each player also has **one removal move** they can use during the game.
-
-Because of that extra rule, positions must be evaluated differently than in standard Connect 4.
-
-## Goal
+## Your Goal
 
 Build a stronger Connect 4 bot by designing a better evaluation function.
+The game engine, rules, and minimax search are already implemented.
+Your job is to write heuristics that score board positions well.
 
-The game engine, rules, CLI, and minimax search are already implemented. Your job is to design heuristics, combine them into evaluators, test them, and improve them.
+## Building
 
-Each player gets **one removal move** in addition to normal piece placement, so your heuristics should account for that rule.
+You need a C compiler (GCC, MinGW, or Clang).
 
-## Key Terms
+```bash
+# Default (gcc)
+make
 
-- `heuristic`: a helper function that scores one aspect of a position, such as a win, a threat, center control, or removal advantage
-- `evaluator`: the object that combines several heuristics into one final score for a board state
+# Use a different compiler
+make CC=clang
+make CC=x86_64-w64-mingw32-gcc
+```
 
-The minimax search uses your evaluator to decide which move is best.
+## Running
 
-## Only Edit These Files
+```bash
+./connect4game        # Linux/Mac
+connect4game.exe      # Windows
+```
 
-You should only work in:
+Or use:
+```bash
+make run
+```
 
-- `connect4/heuristics.py`
-- `connect4/evaluators/`
-- `connect4/test_evaluators/`
-- `connect4/board_states/`
+## Menu Options
 
-Do **not** modify any other files.
+1. **Play against a bot** — select one of your evaluators and play interactively
+2. **Watch two bots play** — pick any two bots (your evaluators + opponents)
+3. **Run experiment** — benchmark an evaluator against all opponents
 
-## What To Do
+## What To Edit
 
-### 1. Add Heuristics
+You may edit: `heuristics.c`, `heuristics.h`, files in `evaluators/`, files in `opponents/`, and `board_states/`.
 
-Implement reusable heuristic helper functions in `connect4/heuristics.py`.
+### 1. Add Heuristics — `heuristics.c` and `heuristics.h`
 
-- Any heuristic used by an evaluator should be implemented in `heuristics.py`.
-- An example heuristic is already provided for reference.
-- Each heuristic should return a numerical score.
+Write reusable functions that score one aspect of a position.
+Each heuristic takes `(const GameState *state, int player)` and returns a `float`.
 
-### 2. Build Evaluators
+An example (`terminal_state_bonus`) is already provided.
 
-Create evaluator files in `connect4/evaluators/`.
+### 2. Build Evaluators — `evaluators/`
 
-- Every evaluator should be in its own separate `.py` file.
-- Evaluators should call the helper functions from `heuristics.py`.
-- `empty.py` is the starting baseline.
+Each evaluator is a separate `.c` file that combines your heuristics into a score.
+Copy `empty.c` as a starting point.
 
-### 3. Create Test Evaluators
+To add a new evaluator:
+1. Create a new `.c` file in `evaluators/` with an evaluate function
+2. Open `evaluators/evaluators.h`
+3. Add an `extern` declaration for your function
+4. Add an entry to the `evaluator_bots[]` array
+5. Rebuild with `make`
 
-Add opponent evaluators in `connect4/test_evaluators/`.
+### 3. Create Test Opponents — `opponents/`
 
-- Each `.py` file in this folder is automatically discovered.
-- Each file must define an `EVALUATOR` object.
+Add `.c` files with opponent evaluators to test your bot against. A weak opponent (`weak.c`)
+is provided as a starting point.
 
-### 4. Create Board States
+To add a new opponent:
+1. Create a new `.c` file in `opponents/` with an evaluate function
+2. Open `opponents/opponents.h`
+3. Add an `extern` declaration for your function
+4. Add an entry to the `opponent_bots[]` array
+5. Rebuild with `make`
 
-Add `.json` board states in `connect4/board_states/`.
+### 4. Create Board States — `board_states/`
 
-Use these to test important situations such as wins, blocks, removal decisions, and endgame positions.
+Add `.json` files to test specific situations. Format:
+
+```json
+{
+  "name": "My Test Position",
+  "current_player": 0,
+  "removals_remaining": [1, 1],
+  "board": [
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, 0,    1,    null, null, null]
+  ]
+}
+```
+
+- Board is 6 rows x 7 columns. `null` = empty, `0` = player O, `1` = player X.
+- Row 0 is the top, row 5 is the bottom.
+- Pieces must obey gravity (no floating pieces).
 
 ### 5. Test and Iterate
 
-Run experiments, study the results, revise your heuristics, and test again.
+Run experiments (option 3), study results, revise heuristics, repeat.
 
-## Run The Program
+## Do NOT Modify
 
-From the project root, run:
+Everything in `engine/` is locked.
+An integrity check runs at startup — if engine files are modified, experiments are blocked.
 
-```powershell
-python -m connect4.cli
-```
+## Quick Start Example
 
-If `python` does not work, try:
+1. Open `heuristics.c`, add a new function:
+   ```c
+   float center_control(const GameState *state, int player) {
+       float score = 0.0f;
+       int r, c;
+       for (r = 0; r < ROWS; r++) {
+           for (c = 0; c < COLS; c++) {
+               if (state->board[r][c] == player) {
+                   int dist = c - 3;
+                   if (dist < 0) dist = -dist;
+                   score += (float)(3 - dist);
+               }
+           }
+       }
+       return score;
+   }
+   ```
+2. Declare it in `heuristics.h`
+3. Create `evaluators/my_bot.c`:
+   ```c
+   #include "../heuristics.h"
+   float my_evaluate(const GameState *state, int player) {
+       float score = 0.0f;
+       score += terminal_state_bonus(state, player);
+       score += 2.0f * center_control(state, player);
+       return score;
+   }
+   ```
+4. Register in `evaluators/evaluators.h`:
+   ```c
+   extern float my_evaluate(const GameState *state, int player);
+   // ... in the array:
+   { my_evaluate, DEFAULT_DEPTH, "MyBot" },
+   ```
+5. `make && ./connect4game` — select MyBot from the menu
 
-```powershell
-py -m connect4.cli
-```
+## Grading
 
-## Submission Checklist
+See `GRADING.md` for the full rubric.
 
-Before submitting, make sure you have:
+## Key Terms
 
-- added heuristic helper functions in `connect4/heuristics.py`
-- kept all heuristics in `connect4/heuristics.py`
-- created evaluator files in `connect4/evaluators/`
-- added test evaluators in `connect4/test_evaluators/`
-- added board states in `connect4/board_states/`
-- run experiments and improved your evaluator
+- **Heuristic**: a function that scores one aspect of a position
+- **Evaluator**: combines multiple heuristics into one score
+- **Minimax**: the search algorithm that uses your evaluator to pick moves (depth = 4)
