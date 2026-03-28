@@ -9,11 +9,6 @@ overall win rate.
 The test opponents and board states used for grading are **not** the same as the ones provided to you.
 You should create your own board states and opponents to prepare.
 
-**Important**: Engine files must pass the integrity check. If any engine file has been
-modified, you receive 0 for this section.
-
----
-
 ## 2. Heuristic Design
 
 Your `heuristics.c` and evaluator files will be reviewed for quality and variety.
@@ -49,7 +44,7 @@ Your report should cover:
 ## Rules
 
 - You may edit: `heuristics.c`, `heuristics.h`, files in `evaluators/`, files in `opponents/`, and `board_states/`.
-- You must **not** modify anything in `engine/`. The integrity check enforces this.
+- You must **not** modify anything in `engine/`. The autograder will compile your submitted student files against a clean grading copy.
 - Your evaluator must only analyze the current board state. It must **not** perform its own
   search (no calling `get_legal_moves`, `apply_move`, or implementing your own minimax/recursion).
   An automated check will scan your code for violations, and your code will be reviewed.
@@ -58,13 +53,13 @@ Your report should cover:
 
 ## What You Submit
 
-Run `./submit.sh yourname` to package your work into a zip, then send:
-1. `yourname.zip` (your heuristics and evaluator files)
+Send:
+1. A link to your repository
 2. Your report as a PDF
 
-Your files will be dropped into a clean copy of the repo and compiled against the autograder.
-Make sure your code compiles cleanly with `make` before submitting.
+The autograder will extract the relevant files from your repo and compile them against a clean grading copy.
+Make sure your code compiles cleanly with your own local build setup before submitting.
 
 ## What You Must NOT Modify
 
-Everything in `engine/`. The integrity check will detect modifications.
+Everything in `engine/`. The autograder will ignore student-side engine edits and use the instructor grading copy instead.

@@ -12,7 +12,6 @@
 #include "bot.h"
 #include "experiment.h"
 #include "board_loader.h"
-#include "integrity.h"
 #include "../evaluators/evaluators.h"
 #include "../opponents/opponents.h"
 
@@ -219,7 +218,6 @@ static void watch_game(Bot *bot1, Bot *bot2) {
 /* ============================================================ */
 
 int main(void) {
-    int engine_ok;
     int num_evals = (int)NUM_EVALUATORS;
     int num_opponents = (int)NUM_OPPONENTS;
     int num_all_bots = num_evals + num_opponents;
@@ -242,9 +240,6 @@ int main(void) {
         all_bots[num_evals + i].name = opponent_bots[i].name;
         all_bots[num_evals + i].fn = opponent_bots[i].evaluate;
     }
-
-    /* Verify engine integrity */
-    engine_ok = verify_engine_integrity();
 
     while (1) {
         int choice;
@@ -288,13 +283,6 @@ int main(void) {
             }
 
         } else if (choice == 3) {
-            if (!engine_ok) {
-                printf("\n[INTEGRITY] Engine files have been modified.\n");
-                printf("Experiment results are INVALID and cannot be used for grading.\n");
-                printf("Restore the original engine files and rebuild.\n\n");
-                continue;
-            }
-
             const char *name;
             EvaluateFn fn;
             if (select_bot("Select a bot to test", eval_list, num_evals,

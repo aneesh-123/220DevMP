@@ -1,4 +1,4 @@
-# Connect 4 with Removals — AI Heuristic Design
+# Connect 4 with Removals - AI Heuristic Design
 
 ## What This Game Is
 
@@ -14,47 +14,50 @@ Your job is to write heuristics that score board positions well.
 
 ## Building
 
-You need a C compiler (GCC, MinGW, or Clang).
+You need a C compiler such as GCC, MinGW, or Clang.
 
-```bash
-# Default (gcc)
-make
+This repo does **not** include a `Makefile`.
+Part of the project is setting up your own local build workflow.
+You may create your own `Makefile`, shell script, PowerShell script, or compile command.
 
-# Use a different compiler
-make CC=clang
-make CC=x86_64-w64-mingw32-gcc
+One example compile command on Windows PowerShell is:
+
+```powershell
+gcc -Wall -Wextra -O2 -Wno-unused-parameter -o connect4game.exe `
+  engine/board.c engine/moves.c engine/rules.c engine/search.c `
+  engine/bot.c engine/experiment.c engine/board_loader.c `
+  engine/cJSON.c engine/cli.c `
+  heuristics.c evaluators/*.c opponents/*.c -lm
 ```
 
 ## Running
 
-```bash
-./connect4game        # Linux/Mac
-connect4game.exe      # Windows
+After you compile the program, run:
+
+```powershell
+.\connect4game.exe
 ```
 
-Or use:
-```bash
-make run
-```
+On Linux or macOS, the executable may be `./connect4game`.
 
 ## Menu Options
 
-1. **Play against a bot** — select one of your evaluators and play interactively
-2. **Watch two bots play** — pick any two bots (your evaluators + opponents)
-3. **Run experiment** — benchmark an evaluator against all opponents
+1. **Play against a bot** - select one of your evaluators and play interactively
+2. **Watch two bots play** - pick any two bots (your evaluators + opponents)
+3. **Run experiment** - benchmark an evaluator against all opponents
 
 ## What To Edit
 
 You may edit: `heuristics.c`, `heuristics.h`, files in `evaluators/`, files in `opponents/`, and `board_states/`.
 
-### 1. Add Heuristics — `heuristics.c` and `heuristics.h`
+### 1. Add Heuristics - `heuristics.c` and `heuristics.h`
 
 Write reusable functions that score one aspect of a position.
 Each heuristic takes `(const GameState *state, int player)` and returns a `float`.
 
 An example (`terminal_state_bonus`) is already provided.
 
-### 2. Build Evaluators — `evaluators/`
+### 2. Build Evaluators - `evaluators/`
 
 Each evaluator is a separate `.c` file that combines your heuristics into a score.
 Copy `empty.c` as a starting point.
@@ -64,9 +67,9 @@ To add a new evaluator:
 2. Open `evaluators/evaluators.h`
 3. Add an `extern` declaration for your function
 4. Add an entry to the `evaluator_bots[]` array
-5. Rebuild with `make`
+5. Rebuild using your own local build command or `Makefile`
 
-### 3. Create Test Opponents — `opponents/`
+### 3. Create Test Opponents - `opponents/`
 
 Add `.c` files with opponent evaluators to test your bot against. A weak opponent (`weak.c`)
 is provided as a starting point.
@@ -76,9 +79,9 @@ To add a new opponent:
 2. Open `opponents/opponents.h`
 3. Add an `extern` declaration for your function
 4. Add an entry to the `opponent_bots[]` array
-5. Rebuild with `make`
+5. Rebuild using your own local build command or `Makefile`
 
-### 4. Create Board States — `board_states/`
+### 4. Create Board States - `board_states/`
 
 Add `.json` files to test specific situations. Format:
 
@@ -109,7 +112,6 @@ Run experiments (option 3), study results, revise heuristics, repeat.
 ## Do NOT Modify
 
 Everything in `engine/` is locked.
-An integrity check runs at startup — if engine files are modified, experiments are blocked.
 
 ## Quick Start Example
 
@@ -141,30 +143,32 @@ An integrity check runs at startup — if engine files are modified, experiments
    // ... in the array:
    { my_evaluate, DEFAULT_DEPTH, "MyBot" },
    ```
-5. `make && ./connect4game` — select MyBot from the menu
+5. Rebuild using your own compile command or your own `Makefile`, then run the program and select `MyBot` from the menu.
 
-This example is intentionally basic. A piece count alone won't win many games — you'll need to
+This example is intentionally basic. A piece count alone won't win many games - you'll need to
 think about what actually matters in Connect 4 positions.
 
 ## Getting Started (Setup)
 
-1. Clone this repo
-2. Build: `make`
-3. Run: `./connect4game` (or `connect4game.exe` on Windows)
-4. Do your work in `heuristics.c`, `heuristics.h`, and `evaluators/`
+1. Clone this repo:
+   ```bash
+   git clone <repo-url>
+   cd 220MPDev
+   ```
+2. Create your own local build workflow.
+   This can be a `Makefile`, a script, or a compiler command you run manually.
+3. Compile the program.
+4. Run the executable.
+5. Do your work in `heuristics.c`, `heuristics.h`, and `evaluators/`.
 
 ## Submission
 
-Run the submit script to package your work:
-```bash
-./submit.sh yourname
-```
+Send a link to your repository along with your report PDF.
 
-This creates `yourname.zip` containing your heuristics and evaluator files.
-Send the zip along with your report PDF.
+Your repository should include your work in `heuristics.c`, `heuristics.h`, and `evaluators/`.
+The autograder will later extract the relevant files from your repo and run them against a clean grading copy.
 
-Your files will be dropped into a clean copy of this repo and run against the autograder.
-Do **not** modify anything in `engine/` — your code won't compile against the grading copy if you do.
+Do **not** modify anything in `engine/` - your code won't compile against the grading copy if you do.
 
 ## Grading
 
