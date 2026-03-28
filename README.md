@@ -115,29 +115,23 @@ An integrity check runs at startup — if engine files are modified, experiments
 
 1. Open `heuristics.c`, add a new function:
    ```c
-   float center_control(const GameState *state, int player) {
-       float score = 0.0f;
-       int r, c;
-       for (r = 0; r < ROWS; r++) {
-           for (c = 0; c < COLS; c++) {
-               if (state->board[r][c] == player) {
-                   int dist = c - 3;
-                   if (dist < 0) dist = -dist;
-                   score += (float)(3 - dist);
-               }
-           }
-       }
-       return score;
+   float piece_count(const GameState *state, int player) {
+       int opponent = 1 - player;
+       return (float)(gamestate_count_pieces(state, player)
+                    - gamestate_count_pieces(state, opponent));
    }
    ```
-2. Declare it in `heuristics.h`
+2. Declare it in `heuristics.h`:
+   ```c
+   float piece_count(const GameState *state, int player);
+   ```
 3. Create `evaluators/my_bot.c`:
    ```c
    #include "../heuristics.h"
    float my_evaluate(const GameState *state, int player) {
        float score = 0.0f;
        score += terminal_state_bonus(state, player);
-       score += 2.0f * center_control(state, player);
+       score += piece_count(state, player);
        return score;
    }
    ```
@@ -148,6 +142,27 @@ An integrity check runs at startup — if engine files are modified, experiments
    { my_evaluate, DEFAULT_DEPTH, "MyBot" },
    ```
 5. `make && ./connect4game` — select MyBot from the menu
+
+This example is intentionally basic. A piece count alone won't win many games — you'll need to
+think about what actually matters in Connect 4 positions.
+
+## Getting Started (Setup)
+
+1. Clone this repo
+2. Build: `make`
+3. Run: `./connect4game` (or `connect4game.exe` on Windows)
+4. Do your work in `heuristics.c`, `heuristics.h`, and `evaluators/`
+
+## Submission
+
+When you're done, send me:
+- `heuristics.c`
+- `heuristics.h`
+- Your `evaluators/` folder (all `.c` files and your updated `evaluators.h`)
+- Your report (PDF, 2 pages max)
+
+I will drop your files into a clean copy of this repo and run them against my autograder.
+Do **not** modify anything in `engine/` — your code won't compile against the grading copy if you do.
 
 ## Grading
 

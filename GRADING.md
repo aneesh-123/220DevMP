@@ -58,11 +58,13 @@ Your report should cover:
 
 ## What You Submit
 
-1. Your `heuristics.c` and `heuristics.h`
-2. Your `evaluators/` directory with your evaluator files and updated `evaluators.h`
-3. Your `opponents/` directory with any test opponents you created
-4. Any board states you created in `board_states/`
-5. Your report as a PDF
+Send the following files:
+1. `heuristics.c` and `heuristics.h`
+2. Your `evaluators/` folder (all `.c` files and your updated `evaluators.h`)
+3. Your report as a PDF
+
+Your files will be dropped into a clean copy of the repo and compiled against the autograder.
+Make sure your code compiles cleanly with `make` before submitting.
 
 ## What You Must NOT Modify
 
