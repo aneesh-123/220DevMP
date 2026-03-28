@@ -155,13 +155,15 @@ think about what actually matters in Connect 4 positions.
 
 ## Submission
 
-When you're done, send me:
-- `heuristics.c`
-- `heuristics.h`
-- Your `evaluators/` folder (all `.c` files and your updated `evaluators.h`)
-- Your report (PDF, 2 pages max)
+Run the submit script to package your work:
+```bash
+./submit.sh yourname
+```
 
-I will drop your files into a clean copy of this repo and run them against my autograder.
+This creates `yourname.zip` containing your heuristics and evaluator files.
+Send the zip along with your report PDF.
+
+Your files will be dropped into a clean copy of this repo and run against the autograder.
 Do **not** modify anything in `engine/` — your code won't compile against the grading copy if you do.
 
 ## Grading

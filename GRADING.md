@@ -58,10 +58,9 @@ Your report should cover:
 
 ## What You Submit
 
-Send the following files:
-1. `heuristics.c` and `heuristics.h`
-2. Your `evaluators/` folder (all `.c` files and your updated `evaluators.h`)
-3. Your report as a PDF
+Run `./submit.sh yourname` to package your work into a zip, then send:
+1. `yourname.zip` (your heuristics and evaluator files)
+2. Your report as a PDF
 
 Your files will be dropped into a clean copy of the repo and compiled against the autograder.
 Make sure your code compiles cleanly with `make` before submitting.
