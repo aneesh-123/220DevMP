@@ -162,11 +162,11 @@ static void play_interactive_game(Bot *bot) {
 /*                     Watch Mode                                */
 /* ============================================================ */
 
-static void watch_game(Bot *bot1, Bot *bot2) {
+static void watch_game(Bot *bot1, Bot *bot2, const GameState *initial_state) {
     GameState state;
     int move_count = 0;
 
-    gamestate_init(&state);
+    state = *initial_state;
     printf("\n%s (O) vs %s (X)\n", bot1->name, bot2->name);
     printf("==================================================\n");
 
@@ -276,9 +276,34 @@ int main(void) {
             if (select_bot("Available bots", all_bots, num_all_bots, &name1, &fn1)) {
                 printf("Select second bot:");
                 if (select_bot("Available bots", all_bots, num_all_bots, &name2, &fn2)) {
+                    /* Load board states and let user pick a starting position */
+                    GameState board_states[MAX_BOARD_STATES];
+                    char board_names[MAX_BOARD_STATES][MAX_STATE_NAME];
+                    int num_boards = load_board_states("board_states",
+                                                       board_states, board_names,
+                                                       MAX_BOARD_STATES);
+                    GameState initial;
+                    gamestate_init(&initial); /* default: empty board */
+
+                    printf("\nStarting board state:\n");
+                    printf("  0. Empty board (default start)\n");
+                    for (i = 0; i < num_boards; i++)
+                        printf("  %d. %s\n", i + 1, board_names[i]);
+                    printf("\nEnter choice: ");
+
+                    int bs_choice;
+                    if (scanf("%d", &bs_choice) == 1 &&
+                        bs_choice >= 1 && bs_choice <= num_boards) {
+                        initial = board_states[bs_choice - 1];
+                        printf("Starting from: %s\n", board_names[bs_choice - 1]);
+                    } else {
+                        printf("Starting from empty board.\n");
+                    }
+                    { int c; while ((c = getchar()) != '\n' && c != EOF); }
+
                     Bot bot1 = bot_create(fn1, DEFAULT_DEPTH, name1);
                     Bot bot2 = bot_create(fn2, DEFAULT_DEPTH, name2);
-                    watch_game(&bot1, &bot2);
+                    watch_game(&bot1, &bot2, &initial);
                 }
             }
 
