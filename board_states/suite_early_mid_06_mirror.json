@@ -1,0 +1,64 @@
+{
+    "name":  "Early Midgame One Sided Threat 06 Mirror",
+    "current_player":  0,
+    "removals_remaining":  [
+                               0,
+                               1
+                           ],
+    "board":  [
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      1,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      0,
+                      1,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      0,
+                      0,
+                      1,
+                      1,
+                      0,
+                      null
+                  ]
+              ]
+}

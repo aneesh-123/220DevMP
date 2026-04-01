@@ -1,0 +1,64 @@
+{
+    "name":  "Horizontal Block Test 01 Mirror Swap",
+    "current_player":  0,
+    "removals_remaining":  [
+                               1,
+                               1
+                           ],
+    "board":  [
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      1,
+                      0,
+                      0,
+                      0,
+                      null,
+                      1,
+                      1
+                  ]
+              ]
+}

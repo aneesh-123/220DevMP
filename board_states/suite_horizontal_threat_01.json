@@ -1,0 +1,64 @@
+{
+    "name":  "Horizontal Threat Race 01",
+    "current_player":  0,
+    "removals_remaining":  [
+                               1,
+                               1
+                           ],
+    "board":  [
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      1,
+                      1,
+                      null,
+                      0,
+                      0,
+                      0,
+                      1
+                  ]
+              ]
+}

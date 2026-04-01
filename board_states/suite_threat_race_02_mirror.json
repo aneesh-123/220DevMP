@@ -1,0 +1,64 @@
+{
+    "name":  "Threat Race 02 Mirror",
+    "current_player":  0,
+    "removals_remaining":  [
+                               1,
+                               1
+                           ],
+    "board":  [
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      1,
+                      0,
+                      0
+                  ],
+                  [
+                      1,
+                      0,
+                      1,
+                      1,
+                      1,
+                      0,
+                      0
+                  ]
+              ]
+}

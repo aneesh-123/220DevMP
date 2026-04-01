@@ -1,0 +1,64 @@
+{
+    "name":  "Fork Setup Puzzle 08 Mirror Swap",
+    "current_player":  0,
+    "removals_remaining":  [
+                               1,
+                               0
+                           ],
+    "board":  [
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      1,
+                      0,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      1,
+                      0,
+                      0,
+                      null
+                  ],
+                  [
+                      0,
+                      1,
+                      0,
+                      1,
+                      1,
+                      0,
+                      1
+                  ]
+              ]
+}

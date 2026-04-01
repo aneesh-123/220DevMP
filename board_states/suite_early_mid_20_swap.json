@@ -1,0 +1,64 @@
+{
+    "name":  "Early Midgame Battle Line 20 Player Swap",
+    "current_player":  0,
+    "removals_remaining":  [
+                               1,
+                               0
+                           ],
+    "board":  [
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null
+                  ],
+                  [
+                      1,
+                      0,
+                      1,
+                      0,
+                      1,
+                      null,
+                      null
+                  ],
+                  [
+                      0,
+                      1,
+                      0,
+                      0,
+                      1,
+                      null,
+                      null
+                  ]
+              ]
+}
