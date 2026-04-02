@@ -1,181 +1,197 @@
 # Connect 4 with Removals - AI Heuristic Design
 
-## What This Game Is
+## Overview
 
-A modified Connect 4 where each player also has **one removal move** per game.
-Players take turns dropping pieces into columns to make 4 in a row (horizontal, vertical, or diagonal).
-The removal adds a strategic twist: you can pull any piece off the board (gravity applies to pieces above).
+This project focuses on building a strong game-playing agent for a modified version of Connect 4.
+
+In addition to standard gameplay, each player has a limited number of removal moves that can be used during the game. Removing a piece causes all pieces above it to fall due to gravity.
+
+This fundamentally changes the strategy of the game:
+
+- Positions that look strong may become weak after a removal
+- Hidden threats can emerge due to board reshaping
+
+Your task is to design an evaluator that can reason about these dynamics effectively.
+
+## What You Are Given
+
+You are **NOT** building the game engine.
+
+The following are already implemented:
+
+- Game rules
+- Move generation
+- Minimax search
+- CLI interface
+
+Your job is to build the strategy layer of the bot.
 
 ## Your Goal
 
-Build a stronger Connect 4 bot by designing a better evaluation function.
-The game engine, rules, and minimax search are already implemented.
-Your job is to write heuristics that score board positions well.
+Design and evaluate a strong Connect 4 agent by:
+
+- Implementing heuristics
+- Combining them into evaluators
+- Testing them on meaningful board states
+- Improving performance through experimentation
+
+## Key Concepts
+
+### Heuristic
+
+A function that scores one aspect of a board position.
+
+Examples:
+
+- Center control
+- Threat creation
+- Blocking opponent wins
+- Removal flexibility
+
+### Evaluator
+
+A function that combines multiple heuristics into a single score.
+
+This score is used by minimax to decide moves.
+
+### Minimax
+
+A recursive decision-making algorithm that:
+
+- Maximizes your score
+- Minimizes opponent score
+
+Your evaluator is used at the leaves of the search tree.
+
+## What You Can Modify
+
+You may edit:
+
+### `heuristics.c` and `heuristics.h`
+
+- Implement reusable heuristic functions
+- Each heuristic should evaluate one feature
+
+### `evaluators/`
+
+- Combine heuristics into full evaluation functions
+- You can create multiple evaluators for comparison
+
+### `opponents/` (optional)
+
+- Create custom bots for benchmarking
+
+### `board_states/` (optional)
+
+- Add JSON board states for targeted testing
+
+## What You MUST NOT Modify
+
+### `engine/`
+
+- The autograder will run your code against a clean engine
+- Any modifications here will break grading
 
 ## Building
 
-You need a C compiler such as GCC, MinGW, or Clang.
+You need a C compiler (GCC, Clang, or MinGW).
 
-This repo does **not** include a `Makefile`.
-Part of the project is setting up your own local build workflow.
-You may create your own `Makefile`, shell script, PowerShell script, or compile command.
+This repo does not include a Makefile - you must set up your own build workflow.
 
-One example compile command on Windows PowerShell is:
+Example compile command:
 
-```powershell
-gcc -Wall -Wextra -O2 -Wno-unused-parameter -o connect4game.exe `
-  engine/board.c engine/moves.c engine/rules.c engine/search.c `
-  engine/bot.c engine/experiment.c engine/board_loader.c `
-  engine/cJSON.c engine/cli.c `
+```sh
+gcc -Wall -Wextra -O2 -Wno-unused-parameter -o connect4game \
+  engine/board.c engine/moves.c engine/rules.c engine/search.c \
+  engine/bot.c engine/experiment.c engine/board_loader.c \
+  engine/cJSON.c engine/cli.c \
   heuristics.c evaluators/*.c opponents/*.c -lm
 ```
 
 ## Running
 
-After you compile the program, run:
+```sh
+./connect4game
+```
+
+On Windows:
 
 ```powershell
 .\connect4game.exe
 ```
 
-On Linux or macOS, the executable may be `./connect4game`.
-
 ## Menu Options
 
-1. **Play against a bot** - select one of your evaluators and play interactively
-2. **Watch two bots play** - pick any two bots (your evaluators + opponents)
-3. **Run experiment** - benchmark an evaluator against all opponents
+- Play against a bot
+- Watch two bots play
+- Run experiments (recommended)
 
-## What To Edit
+## How to Approach the Project
 
-You may edit: `heuristics.c`, `heuristics.h`, files in `evaluators/`, files in `opponents/`, and `board_states/`.
+- Start simple (e.g., piece count, center control)
+- Add more strategic heuristics
+- Run experiments
+- Compare performance
+- Iterate
 
-### 1. Add Heuristics - `heuristics.c` and `heuristics.h`
+## Example Heuristic
 
-Write reusable functions that score one aspect of a position.
-Each heuristic takes `(const GameState *state, int player)` and returns a `float`.
-
-An example (`terminal_state_bonus`) is already provided.
-
-### 2. Build Evaluators - `evaluators/`
-
-Each evaluator is a separate `.c` file that combines your heuristics into a score.
-Copy `empty.c` as a starting point.
-
-To add a new evaluator:
-1. Create a new `.c` file in `evaluators/` with an evaluate function
-2. Open `evaluators/evaluators.h`
-3. Add an `extern` declaration for your function
-4. Add an entry to the `evaluator_bots[]` array
-5. Rebuild using your own local build command or `Makefile`
-
-### 3. Create Test Opponents - `opponents/`
-
-Add `.c` files with opponent evaluators to test your bot against. A weak opponent (`weak.c`)
-is provided as a starting point.
-
-To add a new opponent:
-1. Create a new `.c` file in `opponents/` with an evaluate function
-2. Open `opponents/opponents.h`
-3. Add an `extern` declaration for your function
-4. Add an entry to the `opponent_bots[]` array
-5. Rebuild using your own local build command or `Makefile`
-
-### 4. Create Board States - `board_states/`
-
-Add `.json` files to test specific situations. Format:
-
-```json
-{
-  "name": "My Test Position",
-  "current_player": 0,
-  "removals_remaining": [1, 1],
-  "board": [
-    [null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null],
-    [null, null, 0,    1,    null, null, null]
-  ]
+```c
+float piece_count(const GameState *state, int player) {
+    int opponent = 1 - player;
+    return (float)(gamestate_count_pieces(state, player)
+                 - gamestate_count_pieces(state, opponent));
 }
 ```
 
-- Board is 6 rows x 7 columns. `null` = empty, `0` = player O, `1` = player X.
-- Row 0 is the top, row 5 is the bottom.
-- Pieces must obey gravity (no floating pieces).
+## Example Evaluator
 
-### 5. Test and Iterate
+```c
+float my_evaluate(const GameState *state, int player) {
+    float score = 0.0f;
 
-Run experiments (option 3), study results, revise heuristics, repeat.
+    score += terminal_state_bonus(state, player);
+    score += piece_count(state, player);
 
-## Do NOT Modify
-
-Everything in `engine/` is locked.
-
-## Quick Start Example
-
-1. Open `heuristics.c`, add a new function:
-   ```c
-   float piece_count(const GameState *state, int player) {
-       int opponent = 1 - player;
-       return (float)(gamestate_count_pieces(state, player)
-                    - gamestate_count_pieces(state, opponent));
-   }
-   ```
-2. Declare it in `heuristics.h`:
-   ```c
-   float piece_count(const GameState *state, int player);
-   ```
-3. Create `evaluators/my_bot.c`:
-   ```c
-   #include "../heuristics.h"
-   float my_evaluate(const GameState *state, int player) {
-       float score = 0.0f;
-       score += terminal_state_bonus(state, player);
-       score += piece_count(state, player);
-       return score;
-   }
-   ```
-4. Register in `evaluators/evaluators.h`:
-   ```c
-   extern float my_evaluate(const GameState *state, int player);
-   // ... in the array:
-   { my_evaluate, DEFAULT_DEPTH, "MyBot" },
-   ```
-5. Rebuild using your own compile command or your own `Makefile`, then run the program and select `MyBot` from the menu.
-
-This example is intentionally basic. A piece count alone won't win many games - you'll need to
-think about what actually matters in Connect 4 positions.
-
-## Getting Started (Setup)
-
-1. Clone this repo:
-   ```bash
-   git clone <repo-url>
-   cd 220MPDev
-   ```
-2. Create your own local build workflow.
-   This can be a `Makefile`, a script, or a compiler command you run manually.
-3. Compile the program.
-4. Run the executable.
-5. Do your work in `heuristics.c`, `heuristics.h`, and `evaluators/`.
-
-## Submission
-
-Send a link to your repository along with your report PDF.
-
-Your repository should include your work in `heuristics.c`, `heuristics.h`, and `evaluators/`.
-The autograder will later extract the relevant files from your repo and run them against a clean grading copy.
-
-Do **not** modify anything in `engine/` - your code won't compile against the grading copy if you do.
+    return score;
+}
+```
 
 ## Grading
 
-See `GRADING.md` for the full rubric.
+This project is graded in two parts:
 
-## Key Terms
+### Part 1: Report
 
-- **Heuristic**: a function that scores one aspect of a position
-- **Evaluator**: combines multiple heuristics into one score
-- **Minimax**: the search algorithm that uses your evaluator to pick moves (depth = 4)
+You must justify your design decisions using evidence.
+
+Your report should include:
+
+- Heuristic descriptions and intuition
+- Ablation studies
+- Board-state evaluations
+- Performance comparisons
+- Failure analysis and improvements
+
+(See assignment document for full requirements)
+
+### Part 2: Autograder
+
+Only the following files are graded:
+
+- `heuristics.c`
+- `heuristics.h`
+- `evaluators/evaluators.h`
+- Your final evaluator file(s)
+
+Important:
+
+- Any helper logic must be inside these files
+- Code in other files will be ignored
+
+## Submission
+
+Submit:
+
+- Your repository
+- Your report (PDF)
