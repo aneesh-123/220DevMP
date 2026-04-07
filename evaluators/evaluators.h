@@ -15,13 +15,19 @@
  */
 
 extern float empty_evaluate(const GameState *state, int player);
-/* extern float my_evaluate(const GameState *state, int player); */
+extern float strong_evaluate(const GameState *state, int player);
+extern float without_threat_evaluate(const GameState *state, int player);
+extern float without_center_evaluate(const GameState *state, int player);
+extern float without_removal_evaluate(const GameState *state, int player);
 
 #define DEFAULT_DEPTH 4
 
 static Bot evaluator_bots[] = {
-    { empty_evaluate, DEFAULT_DEPTH, "Empty" },
-    /* { my_evaluate, DEFAULT_DEPTH, "MyBot" }, */
+    { empty_evaluate,           DEFAULT_DEPTH, "Empty"           },
+    { strong_evaluate,          DEFAULT_DEPTH, "Strong"          },
+    { without_threat_evaluate,  DEFAULT_DEPTH, "Without Threat"  },
+    { without_center_evaluate,  DEFAULT_DEPTH, "Without Center"  },
+    { without_removal_evaluate, DEFAULT_DEPTH, "Without Removal" },
 };
 
 #define NUM_EVALUATORS (sizeof(evaluator_bots) / sizeof(evaluator_bots[0]))

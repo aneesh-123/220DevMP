@@ -15,13 +15,19 @@
  */
 
 extern float weak_evaluate(const GameState *state, int player);
-/* extern float my_opponent_evaluate(const GameState *state, int player); */
+extern float medium_evaluate(const GameState *state, int player);
+extern float aggressive_evaluate(const GameState *state, int player);
+extern float defensive_evaluate(const GameState *state, int player);
+extern float removal_hunter_evaluate(const GameState *state, int player);
 
 #define DEFAULT_DEPTH 4
 
 static Bot opponent_bots[] = {
-    { weak_evaluate, DEFAULT_DEPTH, "Weak" },
-    /* { my_opponent_evaluate, DEFAULT_DEPTH, "MyOpponent" }, */
+    { weak_evaluate,            DEFAULT_DEPTH, "Weak"           },
+    { medium_evaluate,          DEFAULT_DEPTH, "Medium"         },
+    { aggressive_evaluate,      DEFAULT_DEPTH, "Aggressive"     },
+    { defensive_evaluate,       DEFAULT_DEPTH, "Defensive"      },
+    { removal_hunter_evaluate,  DEFAULT_DEPTH, "Removal Hunter" },
 };
 
 #define NUM_OPPONENTS (sizeof(opponent_bots) / sizeof(opponent_bots[0]))
