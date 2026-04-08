@@ -12,10 +12,10 @@ float strong_evaluate(const GameState *state, int player) {
     score += terminal_state_bonus(state, player);
 
     /* Threat detection: creating/blocking winning opportunities (high priority) */
-    score += 3.0f * threat_detection(state, player);
+    score += 9.0f * threat_detection(state, player);
 
     /* Center control: flexibility and multiple threat potential */
-    score += 8.5f * center_control(state, player);
+    // score += 3.0f * center_control(state, player);
 
     /* Removal flexibility: tactical advantage in this game variant */
     score += 2.0f * removal_flexibility(state, player);
