@@ -170,6 +170,9 @@ static void watch_game(Bot *bot1, Bot *bot2, const GameState *initial_state) {
     printf("\n%s (O) vs %s (X)\n", bot1->name, bot2->name);
     printf("==================================================\n");
 
+    printf("\nMove 0: Initial board\n\n");
+    gamestate_display(&state);
+
     while (!state.is_terminal) {
         Move legal_moves[MAX_LEGAL_MOVES];
         int num_moves = get_legal_moves(&state, legal_moves);

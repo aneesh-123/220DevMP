@@ -14,14 +14,12 @@
  * 4. Rebuild with: make
  */
 
-extern float empty_evaluate(const GameState *state, int player);
-/* extern float my_evaluate(const GameState *state, int player); */
+extern float final_evaluator(const GameState *state, int player);
 
 #define DEFAULT_DEPTH 4
 
 static Bot evaluator_bots[] = {
-    { empty_evaluate, DEFAULT_DEPTH, "Empty" },
-    /* { my_evaluate, DEFAULT_DEPTH, "MyBot" }, */
+    { final_evaluator,          DEFAULT_DEPTH, "Final"          }
 };
 
 #define NUM_EVALUATORS (sizeof(evaluator_bots) / sizeof(evaluator_bots[0]))
