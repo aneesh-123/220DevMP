@@ -32,7 +32,7 @@ float center_control(const GameState *state, int player) {
     int opponent = 1 - player;
     float score = 0.0f;
     /* Weight columns by distance from center (col 3): center=3, adj=2, outer=1, corner=0 */
-    static const float col_weights[COLS] = {0.0f, 1.0f, 2.0f, 3.0f, 2.0f, 1.0f, 0.0f};
+    static const float col_weights[COLS] = {0.0f, 0.5f, 1.0f, 1.5f, 1.0f, 0.5f, 0.0f};
 
     for (int row = 0; row < ROWS; row++) {
         for (int col = 0; col < COLS; col++) {
