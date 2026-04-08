@@ -5,7 +5,7 @@
 
 #include "../heuristics.h"
 
-float strong_evaluate(const GameState *state, int player) {
+float final_evaluator(const GameState *state, int player) {
     float score = 0.0f;
 
     /* Terminal state check: massive bonus/penalty for wins/losses */
