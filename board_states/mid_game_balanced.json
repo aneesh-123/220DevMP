@@ -1,0 +1,14 @@
+{
+  "name": "Mid Game Balanced (16 pieces)",
+  "description": "Both players have 8 pieces. Contested center with mixed horizontal and vertical structure. Neither player has an immediate threat — tests general positional evaluation.",
+  "current_player": 0,
+  "removals_remaining": [1, 1],
+  "board": [
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, 1,    null, null, null],
+    [null, null, 1,    0,    0,    null, null],
+    [null, 0,    0,    1,    1,    1,    null],
+    [0,    1,    1,    0,    0,    1,    0   ]
+  ]
+}

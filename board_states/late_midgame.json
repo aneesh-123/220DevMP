@@ -1,0 +1,14 @@
+{
+  "name": "Late Midgame (21 pieces, Complex Position)",
+  "description": "21-piece position with irregular structure — no clean alternating patterns. Multiple overlapping threat directions. Col 0 is tallest (5 pieces). Tests whether the evaluator can handle complex multi-directional positions without being misled by simple heuristics.",
+  "current_player": 0,
+  "removals_remaining": [1, 1],
+  "board": [
+    [null, null, null, null, null, null, null],
+    [null, 1,    null, null, null, null, null],
+    [1,    0,    1,    null, null, null, null],
+    [0,    1,    1,    0,    null, null, null],
+    [1,    0,    0,    1,    0,    1,    null],
+    [0,    0,    1,    0,    1,    1,    0   ]
+  ]
+}

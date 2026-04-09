@@ -1,0 +1,14 @@
+{
+  "name": "Removal Creates Win (Gravity Collapse)",
+  "description": "P0 has pieces at row 5 cols 0-2, and a piece at row 4 col 3 sitting on top of P1's piece at row 5 col 3. If P0 removes P1's piece at (row 5, col 3), gravity drops P0's piece from row 4 to row 5 col 3 — completing a horizontal 4-in-a-row for P0 at row 5. Tests whether the evaluator can see wins created by removal-triggered gravity cascades.",
+  "current_player": 0,
+  "removals_remaining": [1, 1],
+  "board": [
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, 0,    null, 1,    null],
+    [0,    0,    0,    1,    null, 1,    null]
+  ]
+}

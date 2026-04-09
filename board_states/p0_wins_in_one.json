@@ -1,0 +1,14 @@
+{
+  "name": "P0 Wins in One (Horizontal)",
+  "description": "P0 has three in a row (cols 1-3, row 5). Col 0 is blocked by P1. P0 wins immediately by playing col 4. Tests whether the evaluator recognizes an immediate winning move.",
+  "current_player": 0,
+  "removals_remaining": [1, 1],
+  "board": [
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [1,    null, null, null, null, null, null],
+    [1,    0,    0,    0,    null, null, 1   ]
+  ]
+}

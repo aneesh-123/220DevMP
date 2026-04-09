@@ -1,0 +1,14 @@
+{
+  "name": "Diagonal Battle (Anti-Diagonal vs Vertical)",
+  "description": "P0 has an anti-diagonal 3-in-a-row: (5,2), (4,3), (3,4). P0 wins by playing col 5 (piece falls to row 2, completing diagonal (2,5),(3,4),(4,3),(5,2)). P1 also has a vertical 3-in-a-row at col 5 rows 3-5 and threatens the same col 5 for vertical win. Whoever plays col 5 first wins. Tests diagonal threat detection vs vertical threat detection.",
+  "current_player": 0,
+  "removals_remaining": [1, 1],
+  "board": [
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, 0,    1,    null],
+    [null, null, null, 0,    1,    1,    null],
+    [0,    0,    0,    1,    1,    1,    null]
+  ]
+}

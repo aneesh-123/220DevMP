@@ -1,0 +1,14 @@
+{
+  "name": "Double Threat Setup (Fork in One)",
+  "description": "P0 to move. Playing col 3 creates a fork: (a) horizontal 3-in-a-row at row 5 cols 1-3 needs col 4, and (b) vertical 3-in-a-row at col 1 rows 3-5 needs row 2. P1 can only block one. Tests whether the evaluator sees multi-move tactics at depth >= 2.",
+  "current_player": 0,
+  "removals_remaining": [1, 1],
+  "board": [
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, 0,    null, null, null, null, null],
+    [null, 0,    null, null, null, 1,    null],
+    [1,    0,    0,    null, null, 1,    null]
+  ]
+}

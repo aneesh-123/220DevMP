@@ -1,0 +1,14 @@
+{
+  "name": "Near Full Board (35 pieces)",
+  "description": "35 of 42 cells filled. Cols 0-4 are completely full; cols 5-6 have 3 and 2 pieces respectively. No 4-in-a-row exists. Very few legal placements remain, making removal moves especially valuable. Tests late-game evaluation and removal prioritization.",
+  "current_player": 1,
+  "removals_remaining": [1, 1],
+  "board": [
+    [0,    0,    1,    1,    0,    null, null],
+    [1,    1,    0,    0,    1,    null, null],
+    [0,    0,    1,    1,    0,    null, null],
+    [1,    1,    0,    0,    1,    1,    null],
+    [0,    0,    1,    1,    0,    1,    0   ],
+    [1,    1,    0,    0,    1,    0,    0   ]
+  ]
+}

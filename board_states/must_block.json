@@ -1,0 +1,14 @@
+{
+  "name": "Must Block (P1 Horizontal Threat)",
+  "description": "P1 has three in a row (cols 1-3, row 5). P0 must play col 4 this turn or P1 wins next move. Tests whether the evaluator correctly prioritizes defensive blocking.",
+  "current_player": 0,
+  "removals_remaining": [1, 1],
+  "board": [
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [0,    null, null, null, null, null, null],
+    [0,    1,    1,    1,    null, null, 0   ]
+  ]
+}

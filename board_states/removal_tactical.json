@@ -1,0 +1,14 @@
+{
+  "name": "Removal Tactical (Disrupt Vertical)",
+  "description": "P1 has a vertical 3-in-a-row at col 1 (rows 3-5), threatening row 2 for a win. P0 has one removal. P0 can either: (a) play col 1 to block by placement, or (b) remove P1's piece at row 3 col 1, breaking the vertical stack entirely. Tests whether removal is used as a strategic disruption tool.",
+  "current_player": 0,
+  "removals_remaining": [1, 0],
+  "board": [
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, 1,    null, null, null, null, null],
+    [null, 1,    null, null, null, null, null],
+    [0,    1,    0,    1,    0,    null, null]
+  ]
+}
