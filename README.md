@@ -137,3 +137,62 @@ The autograder will only extract:
 
 Any code outside these files will be ignored.
 
+## Build and Run (in EWS)
+We have provided you with a Makefile to easily compile the code. Below is how you would compile and run the connect4 program.
+
+make clean
+make
+./connect4game
+
+
+---
+## AI Use
+
+Unlike other MPs, this one is designed to observe and test how well you use AI to solve complex problems. Therefore, the use of AI is permitted and encouraged. However, keep in mind how and why you are using it because the report will ask you questions related to it.
+
+---
+
+## Grading
+
+This MP will be graded in two parts:
+
+### Report
+
+The report can be found here: **LINK TO THE REPORT REQUIREMENTS**
+
+This report will be essential to proving why your evaluator is satisfactory.
+
+---
+
+### Autograder
+
+The autograder will only extract and evaluate the following files from your submission:
+
+- `heuristics.c`
+- `heuristics.h`
+- `evaluators/evaluators.h`
+- `evaluators/final_evaluator.c`
+
+No other files will be used during grading.
+
+Any logic, helper functions, or dependencies that your evaluator relies on must be defined within these files. Code placed in other files will be ignored by the autograder.
+
+---
+
+### Evaluation Methods
+
+#### 1. Scorer
+
+Your evaluator will be tested on a set of predefined board states. For each board state, it must select a recommended move. The autograder will compare your chosen move against a labeled set of:
+- Weak  
+- OK  
+- Strong  
+
+to assess its quality.
+
+---
+
+#### 2. Test Opponents
+
+Your evaluator will also be evaluated by playing against a diverse set of opponents across many board states. Its overall performance in these games will be used to determine its strength.
+
