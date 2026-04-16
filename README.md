@@ -1,197 +1,139 @@
-# Connect 4 with Removals - AI Heuristic Design
+# Extra Credit Assignment - Connect 4 With Removal
 
-## Overview
+## Introduction
 
-This project focuses on building a strong game-playing agent for a modified version of Connect 4.
+The goals of this MP are:
+- Get yourself comfortable with using AI-assisted coding to solve a task  
+- Design a strong game-playing agent for a modified version of Connect 4  
+- Evaluate and improve upon your design via experimentation  
+- Prove with evidence why your design is superior  
 
-In addition to standard gameplay, each player has a limited number of removal moves that can be used during the game. Removing a piece causes all pieces above it to fall due to gravity.
+---
 
-This fundamentally changes the strategy of the game:
+## Rules of the Game
 
-- Positions that look strong may become weak after a removal
-- Hidden threats can emerge due to board reshaping
+This project uses a modified version of Connect 4.
 
-Your task is to design an evaluator that can reason about these dynamics effectively.
+- Players alternate turns.  
+- On a normal turn, a player drops a piece into one of the columns.  
+- A player wins by making four of their pieces in a row horizontally, vertically, or diagonally.  
+- In addition to normal placement moves, each player has **ONE removal move** during the game.  
+- A removal move allows a player to remove a piece from the board according to the rules implemented by the engine.  
+- After a piece is removed, gravity applies, and all pieces above that location fall downward.  
+- Once a winning board state is created, the game ends.  
 
-## What You Are Given
+Because removals can drastically change board structure, a strong evaluator must reason about both current threats and future board reshaping. Because this rule changes the structure of the game, board positions must be evaluated differently than in standard Connect 4.
 
-You are **NOT** building the game engine.
+In particular:
+- A position that looks strong in the short term may become weak if an important piece can be removed  
+- A position that appears safe may contain hidden threats enabled by future removals  
 
-The following are already implemented:
+The skeleton code, along with a weak evaluator, provides an option to play this modified version to see for yourself. Instructions on how to run this are below.
 
-- Game rules
-- Move generation
-- Minimax search
-- CLI interface
+---
 
-Your job is to build the strategy layer of the bot.
-
-## Your Goal
-
-Design and evaluate a strong Connect 4 agent by:
-
-- Implementing heuristics
-- Combining them into evaluators
-- Testing them on meaningful board states
-- Improving performance through experimentation
-
-## Key Concepts
+## Key Terms
 
 ### Heuristic
-
-A function that scores one aspect of a board position.
-
-Examples:
-
-- Center control
-- Threat creation
-- Blocking opponent wins
-- Removal flexibility
+A helper function that scores one feature of a board position.  
+Examples include:
+- Rewarding center control  
+- Detecting immediate wins  
+- Penalizing opponent threats  
+- Valuing removal flexibility  
 
 ### Evaluator
+A function that combines several heuristics into one final numerical score for a board state.
 
-A function that combines multiple heuristics into a single score.
-
-This score is used by minimax to decide moves.
+### Board State
+A saved game position used to test whether an evaluator behaves sensibly in important situations.
 
 ### Minimax
+The minimax algorithm is a decision-making strategy used to choose the best move in a two-player game by simulating future gameplay.
 
-A recursive decision-making algorithm that:
+- It recursively explores possible moves  
+- You (the maximizing player) try to maximize the score  
+- Your opponent (the minimizing player) tries to minimize it  
+- At the deepest level, your evaluator assigns a score to each board state  
+- These scores are propagated back up to determine the optimal move  
 
-- Maximizes your score
-- Minimizes opponent score
+We provide you with a strong version of the minimax algorithm already implemented that you should **NOT modify**. It is highly recommended to understand it thoroughly.
 
-Your evaluator is used at the leaves of the search tree.
+**Resources:**
+- Minimax overview: https://www.youtube.com/watch?v=SLgZhpDsrfc  
+- Heuristics + Alpha-Beta: https://www.youtube.com/watch?v=DV5d31z1xTI  
 
-## What You Can Modify
+---
 
-You may edit:
+## Heuristics
 
-### `heuristics.c` and `heuristics.h`
+It is unrealistic for an evaluator to fully explore the game tree in real time due to CPU constraints.
 
-- Implement reusable heuristic functions
-- Each heuristic should evaluate one feature
+- Minimax explores up to depth = 5  
+- Leaf nodes rely heavily on heuristic evaluation  
 
-### `evaluators/`
+A heuristic estimates how good a board position is without searching to the end of the game.
 
-- Combine heuristics into full evaluation functions
-- You can create multiple evaluators for comparison
+A good heuristic:
+- Reflects real strategic value  
+- Rewards strong positions  
+- Aligns higher scores with higher win probability  
 
-### `opponents/` (optional)
+Your job:
+- Research heuristics  
+- Implement them  
+- Combine them into a strong evaluator  
 
-- Create custom bots for benchmarking
+---
 
-### `board_states/` (optional)
+## Your Task
 
-- Add JSON board states for targeted testing
+You are **NOT** building the full game engine.
 
-## What You MUST NOT Modify
+The following are already provided:
+- Game engine  
+- Rules  
+- Move generation  
+- Minimax framework  
+- Runner for experiments  
 
-### `engine/`
+Your job is to implement the **strategy layer**.
 
-- The autograder will run your code against a clean engine
-- Any modifications here will break grading
+### You must edit:
 
-## Building
+#### `heuristics.c` and `heuristics.h`
+- Implement reusable heuristic functions  
+- Each heuristic should score one aspect of the board  
 
-You need a C compiler (GCC, Clang, or MinGW).
+#### `evaluators/final_evaluator.c` and `evaluators/evaluators.h`
+- Combine heuristics into a final score  
+- You may create multiple evaluators to compare ideas  
+- You can copy and modify the starter evaluator  
 
-This repo does not include a Makefile - you must set up your own build workflow.
+#### `opponents/`
+- Create custom opponent bots  
+- Useful for benchmarking (weak → strong → removal-aware)  
 
-Example compile command:
+#### `board_states/`
+- Create JSON board states  
+- Represent key tactical scenarios:
+  - Immediate wins  
+  - Blocks  
+  - Forks  
+  - Traps  
+  - Removal-based positions  
 
-```sh
-gcc -Wall -Wextra -O2 -Wno-unused-parameter -o connect4game \
-  engine/board.c engine/moves.c engine/rules.c engine/search.c \
-  engine/bot.c engine/experiment.c engine/board_loader.c \
-  engine/cJSON.c engine/cli.c \
-  heuristics.c evaluators/*.c opponents/*.c -lm
-```
+---
 
-## Running
+## Important Restrictions
 
-```sh
-./connect4game
-```
+**DO NOT MODIFY anything in `engine/`**
 
-On Windows:
-
-```powershell
-.\connect4game.exe
-```
-
-## Menu Options
-
-- Play against a bot
-- Watch two bots play
-- Run experiments (recommended)
-
-## How to Approach the Project
-
-- Start simple (e.g., piece count, center control)
-- Add more strategic heuristics
-- Run experiments
-- Compare performance
-- Iterate
-
-## Example Heuristic
-
-```c
-float piece_count(const GameState *state, int player) {
-    int opponent = 1 - player;
-    return (float)(gamestate_count_pieces(state, player)
-                 - gamestate_count_pieces(state, opponent));
-}
-```
-
-## Example Evaluator
-
-```c
-float my_evaluate(const GameState *state, int player) {
-    float score = 0.0f;
-
-    score += terminal_state_bonus(state, player);
-    score += piece_count(state, player);
-
-    return score;
-}
-```
-
-## Grading
-
-This project is graded in two parts:
-
-### Part 1: Report
-
-You must justify your design decisions using evidence.
-
-Your report should include:
-
-- Heuristic descriptions and intuition
-- Ablation studies
-- Board-state evaluations
-- Performance comparisons
-- Failure analysis and improvements
-
-(See assignment document for full requirements)
-
-### Part 2: Autograder
-
-Only the following files are graded:
-
+The autograder will only extract:
 - `heuristics.c`
 - `heuristics.h`
 - `evaluators/evaluators.h`
-- Your final evaluator file(s)
+- `evaluators/final_evaluator.c`
 
-Important:
+Any code outside these files will be ignored.
 
-- Any helper logic must be inside these files
-- Code in other files will be ignored
-
-## Submission
-
-Submit:
-
-- Your repository
-- Your report (PDF)
