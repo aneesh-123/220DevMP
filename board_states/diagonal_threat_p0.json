@@ -1,0 +1,13 @@
+{
+  "name": "Diagonal Threat P0",
+  "current_player": 1,
+  "removals_remaining": [1, 1],
+  "board": [
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, 0,    1,    null, null, null],
+    [null, 0,    1,    1,    null, null, null],
+    [0,    1,    0,    1,    0,    null, null]
+  ]
+}

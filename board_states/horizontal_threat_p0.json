@@ -1,0 +1,13 @@
+{
+  "name": "Horizontal Threat P0",
+  "current_player": 0,
+  "removals_remaining": [1, 1],
+  "board": [
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [1,    0,    0,    0,    null, 1,    null]
+  ]
+}

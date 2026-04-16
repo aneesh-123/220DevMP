@@ -1,0 +1,13 @@
+{
+  "name": "Removal Strategic P0",
+  "current_player": 0,
+  "removals_remaining": [1, 0],
+  "board": [
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null],
+    [null, 1,    1,    1,    null, 0,    0   ]
+  ]
+}

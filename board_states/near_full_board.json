@@ -1,0 +1,13 @@
+{
+  "name": "Near Full Board",
+  "current_player": 0,
+  "removals_remaining": [0, 0],
+  "board": [
+    [null, null, 0,    null, 1,    null, null],
+    [0,    1,    1,    0,    0,    1,    0   ],
+    [1,    0,    0,    1,    1,    0,    1   ],
+    [0,    1,    1,    0,    0,    1,    0   ],
+    [1,    0,    0,    1,    1,    0,    1   ],
+    [0,    1,    1,    0,    0,    1,    0   ]
+  ]
+}
