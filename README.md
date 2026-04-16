@@ -146,10 +146,11 @@ Any code outside these files will be ignored.
 ## Build and Run (in EWS)
 We have provided you with a Makefile to easily compile the code. Below is how you would compile and run the connect4 program.
 
--make clean
--make
--./connect4game
-
+```
+make clean
+make
+./connect4game
+```
 
 ---
 ## AI Use
