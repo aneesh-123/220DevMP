@@ -159,61 +159,98 @@ static void play_interactive_game(Bot *bot) {
 }
 
 /* ============================================================ */
-/*                     Watch Mode                                */
+/*                  Evaluate Board State Mode                    */
 /* ============================================================ */
 
-static void watch_game(Bot *bot1, Bot *bot2, const GameState *initial_state) {
-    GameState state;
-    int move_count = 0;
+static void evaluate_board_state(BotEntry *all_bots, int num_all_bots) {
+    int i;
 
-    state = *initial_state;
-    printf("\n%s (O) vs %s (X)\n", bot1->name, bot2->name);
-    printf("==================================================\n");
+    /* Step 1: Load board states */
+    GameState board_states[MAX_BOARD_STATES];
+    char board_names[MAX_BOARD_STATES][MAX_STATE_NAME];
+    int num_boards = load_board_states("board_states", board_states, board_names,
+                                       MAX_BOARD_STATES);
 
-    printf("\nMove 0: Initial board\n\n");
-    gamestate_display(&state);
-
-    while (!state.is_terminal) {
-        Move legal_moves[MAX_LEGAL_MOVES];
-        int num_moves = get_legal_moves(&state, legal_moves);
-        if (num_moves == 0) break;
-
-        Move move;
-        const char *bot_name;
-        int found;
-
-        if (state.current_player == CELL_P0) {
-            found = bot_choose_move(bot1, &state, &move);
-            bot_name = bot1->name;
-        } else {
-            found = bot_choose_move(bot2, &state, &move);
-            bot_name = bot2->name;
-        }
-
-        if (!found) break;
-
-        {
-            char move_str[64];
-            move_to_string(move, move_str);
-            printf("\nMove %d: %s plays %s\n", move_count + 1, bot_name, move_str);
-        }
-
-        state = apply_move(&state, move);
-        move_count++;
-
-        printf("\n");
-        gamestate_display(&state);
+    if (num_boards == 0) {
+        printf("No board states found in board_states/ folder.\n");
+        return;
     }
 
-    printf("\n==================================================\n");
-    if (state.winner != WINNER_NONE) {
-        const char *winner_name = (state.winner == CELL_P0) ? bot1->name : bot2->name;
-        printf("Game over! Player %c (%s) wins in %d moves!\n",
-               state.winner == CELL_P0 ? 'O' : 'X', winner_name, move_count);
-    } else {
-        printf("Game over! Draw in %d moves.\n", move_count);
+    printf("\nSelect a board state:\n");
+    for (i = 0; i < num_boards; i++)
+        printf("  %d. %s\n", i + 1, board_names[i]);
+    printf("  0. Cancel\n");
+    printf("\nEnter choice: ");
+
+    int bs_choice;
+    if (scanf("%d", &bs_choice) != 1) {
+        int c; while ((c = getchar()) != '\n' && c != EOF);
+        printf("Invalid input.\n");
+        return;
     }
-    printf("==================================================\n");
+    { int c; while ((c = getchar()) != '\n' && c != EOF); }
+
+    if (bs_choice == 0) return;
+    if (bs_choice < 1 || bs_choice > num_boards) {
+        printf("Invalid choice.\n");
+        return;
+    }
+
+    GameState state = board_states[bs_choice - 1];
+    const char *board_name = board_names[bs_choice - 1];
+
+    /* Step 2: Pick an evaluator */
+    const char *eval_name;
+    EvaluateFn eval_fn;
+    if (!select_bot("Select an evaluator", all_bots, num_all_bots,
+                    &eval_name, &eval_fn))
+        return;
+
+    /* Step 3: Score every legal move at depth DEFAULT_DEPTH - 1 */
+    Move legal_moves[MAX_LEGAL_MOVES];
+    int num_moves = get_legal_moves(&state, legal_moves);
+
+    typedef struct { Move move; float score; } MoveScore;
+    MoveScore scored[MAX_LEGAL_MOVES];
+
+    for (i = 0; i < num_moves; i++) {
+        GameState next = apply_move(&state, legal_moves[i]);
+        scored[i].move = legal_moves[i];
+        scored[i].score = eval_fn(&next, state.current_player);
+    }
+
+    /* Insertion sort descending by score */
+    for (i = 1; i < num_moves; i++) {
+        MoveScore key = scored[i];
+        int j = i - 1;
+        while (j >= 0 && scored[j].score < key.score) {
+            scored[j + 1] = scored[j];
+            j--;
+        }
+        scored[j + 1] = key;
+    }
+
+    /* Print header */
+    const char *player_label = (state.current_player == CELL_P0) ? "O" : "X";
+    printf("\n============================================================\n");
+    printf("Board State:  %s\n", board_name);
+    printf("Evaluator:    %s\n", eval_name);
+    printf("Current player: %s\n", player_label);
+    printf("Removals remaining: O=%d, X=%d\n",
+           state.removals_remaining[CELL_P0],
+           state.removals_remaining[CELL_P1]);
+    printf("============================================================\n");
+
+    int top = num_moves < 5 ? num_moves : 5;
+    printf("\nTop %d moves:\n", top);
+    for (i = 0; i < top; i++) {
+        char move_str[64];
+        move_to_string(scored[i].move, move_str);
+        printf("  Rank %d:  %-20s score: %10.2f\n",
+               i + 1, move_str, scored[i].score);
+    }
+
+    printf("\n============================================================\n");
 }
 
 /* ============================================================ */
@@ -251,7 +288,7 @@ int main(void) {
         printf("Connect 4 with Removals - AI Heuristic Design\n");
         printf("==================================================\n");
         printf("1. Play against a bot\n");
-        printf("2. Watch two bots play\n");
+        printf("2. Evaluate board state\n");
         printf("3. Run experiment\n");
         printf("4. Quit\n\n");
 
@@ -273,42 +310,7 @@ int main(void) {
             }
 
         } else if (choice == 2) {
-            const char *name1, *name2;
-            EvaluateFn fn1, fn2;
-            printf("\nSelect first bot:");
-            if (select_bot("Available bots", all_bots, num_all_bots, &name1, &fn1)) {
-                printf("Select second bot:");
-                if (select_bot("Available bots", all_bots, num_all_bots, &name2, &fn2)) {
-                    /* Load board states and let user pick a starting position */
-                    GameState board_states[MAX_BOARD_STATES];
-                    char board_names[MAX_BOARD_STATES][MAX_STATE_NAME];
-                    int num_boards = load_board_states("board_states",
-                                                       board_states, board_names,
-                                                       MAX_BOARD_STATES);
-                    GameState initial;
-                    gamestate_init(&initial); /* default: empty board */
-
-                    printf("\nStarting board state:\n");
-                    printf("  0. Empty board (default start)\n");
-                    for (i = 0; i < num_boards; i++)
-                        printf("  %d. %s\n", i + 1, board_names[i]);
-                    printf("\nEnter choice: ");
-
-                    int bs_choice;
-                    if (scanf("%d", &bs_choice) == 1 &&
-                        bs_choice >= 1 && bs_choice <= num_boards) {
-                        initial = board_states[bs_choice - 1];
-                        printf("Starting from: %s\n", board_names[bs_choice - 1]);
-                    } else {
-                        printf("Starting from empty board.\n");
-                    }
-                    { int c; while ((c = getchar()) != '\n' && c != EOF); }
-
-                    Bot bot1 = bot_create(fn1, DEFAULT_DEPTH, name1);
-                    Bot bot2 = bot_create(fn2, DEFAULT_DEPTH, name2);
-                    watch_game(&bot1, &bot2, &initial);
-                }
-            }
+            evaluate_board_state(all_bots, num_all_bots);
 
         } else if (choice == 3) {
             const char *name;
