@@ -69,7 +69,7 @@ We provide you with a strong version of the minimax algorithm already implemente
 
 It is unrealistic for an evaluator to fully explore the game tree in real time due to CPU constraints.
 
-- Minimax explores up to depth = 5  
+- Minimax explores up to depth = 4  
 - Leaf nodes rely heavily on heuristic evaluation  
 
 A heuristic estimates how good a board position is without searching to the end of the game.
