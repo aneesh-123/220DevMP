@@ -77,7 +77,8 @@ A heuristic estimates how good a board position is without searching to the end 
 A good heuristic:
 - Reflects real strategic value  
 - Rewards strong positions  
-- Aligns higher scores with higher win probability  
+- Aligns higher scores with higher win probability
+
 
 Your job:
 - Research heuristics  
@@ -190,7 +191,6 @@ Your evaluator will be tested on a set of predefined board states. For each boar
 
 to assess its quality.
 
----
 
 #### 2. Test Opponents
 
