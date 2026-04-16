@@ -79,8 +79,11 @@ A good heuristic:
 - Rewards strong positions  
 - Aligns higher scores with higher win probability
 
+<p align="center">
 <img width="337" height="352" alt="image" src="https://github.com/user-attachments/assets/72d315fe-2f49-4460-9e1f-026f295abefc" />
-*Figure 1: If its Red player’s turn from the position above, a strong heuristic would assign a higher score to the bottom-left orientation, while a weak one would assign a higher score to the bottom-right*
+<br>
+<em>Figure 1: If its Red player’s turn from the position above, a strong heuristic would assign a higher score to the bottom-left orientation, while a weak one would assign a higher score to the bottom-right</em>
+</p>
 
 Your job:
 - Research heuristics  
