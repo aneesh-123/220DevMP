@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "moves.h"
+#include "board.h"
 
 Move move_placement(int column) {
     Move m;
@@ -23,7 +24,7 @@ void move_to_string(Move move, char *buf) {
     if (move.type == MOVE_PLACEMENT)
         sprintf(buf, "Place in column %d", move.column);
     else
-        sprintf(buf, "Remove row %d col %d", move.row, move.col);
+        sprintf(buf, "Remove row %d col %d", ROWS - 1 - move.row, move.col);
 }
 
 int move_equals(Move a, Move b) {

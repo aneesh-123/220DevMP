@@ -110,7 +110,7 @@ static void play_interactive_game(Bot *bot) {
                 } else if (strncmp(cmd, "remove ", 7) == 0) {
                     int row, col;
                     if (sscanf(cmd + 7, "%d %d", &row, &col) == 2) {
-                        Move m = move_removal(row, col);
+                        Move m = move_removal(ROWS - 1 - row, col);
                         int i, found = 0;
                         for (i = 0; i < num_moves; i++) {
                             if (move_equals(legal_moves[i], m)) { found = 1; break; }
