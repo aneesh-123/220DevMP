@@ -235,6 +235,9 @@ static void evaluate_board_state(BotEntry *all_bots, int num_all_bots) {
     printf("\n============================================================\n");
     printf("Board State:  %s\n", board_name);
     printf("Evaluator:    %s\n", eval_name);
+    printf("============================================================\n\n");
+    gamestate_display(&state);
+    printf("============================================================\n");
     printf("Current player: %s\n", player_label);
     printf("Removals remaining: O=%d, X=%d\n",
            state.removals_remaining[CELL_P0],
