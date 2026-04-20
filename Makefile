@@ -1,12 +1,21 @@
-.PHONY: all clean
+CC      = gcc
+CFLAGS  = -Wall -Wextra -std=c99 -O2 -Iengine
+SRC     = engine/board.c engine/rules.c engine/make_move.c engine/cli.c
+OBJ     = $(SRC:.c=.o)
+TARGET  = connect4
 
-all:
-	gcc -Wall -Wextra -O2 -Wno-unused-parameter \
-	  -o connect4game \
-	  engine/board.c engine/moves.c engine/rules.c engine/search.c \
-	  engine/bot.c engine/experiment.c engine/board_loader.c \
-	  engine/cJSON.c engine/cli.c \
-	  heuristics.c evaluators/*.c opponents/*.c -lm
+.PHONY: all clean run
+
+all: $(TARGET)
+
+$(TARGET): $(OBJ)
+	$(CC) $(CFLAGS) -o $@ $(OBJ)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+run: $(TARGET)
+	./$(TARGET)
 
 clean:
-	rm -f connect4game connect4game.exe *.o
+	rm -f $(OBJ) $(TARGET) $(TARGET).exe

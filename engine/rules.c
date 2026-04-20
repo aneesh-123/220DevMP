@@ -1,161 +1,117 @@
 #include "rules.h"
 
-int get_legal_moves(const GameState *state, Move *moves_out) {
-    int count = 0;
-    int col, row;
-
-    /* Placement moves: any non-full column */
-    for (col = 0; col < COLS; col++) {
-        if (!gamestate_is_column_full(state, col)) {
-            moves_out[count++] = move_placement(col);
-        }
+int column_height(const GameState *state, int col) {
+    int h = 0;
+    for (int r = 0; r < ROWS; r++) {
+        if (state->board[r][col] != EMPTY) h++;
     }
-
-    /* Removal moves: any occupied cell if player has removals left */
-    if (state->removals_remaining[state->current_player] > 0) {
-        for (row = 0; row < ROWS; row++) {
-            for (col = 0; col < COLS; col++) {
-                if (gamestate_is_cell_occupied(state, row, col)) {
-                    moves_out[count++] = move_removal(row, col);
-                }
-            }
-        }
-    }
-
-    return count;
+    return h;
 }
 
-static void apply_placement(GameState *state, Move move) {
-    int col = move.column;
-    int row;
-    for (row = ROWS - 1; row >= 0; row--) {
-        if (state->board[row][col] == CELL_EMPTY) {
-            state->board[row][col] = state->current_player;
-            return;
-        }
+int is_legal_move(const GameState *state, Move move) {
+    if (state->is_terminal) return 0;
+
+    if (move.type == MOVE_PLACEMENT) {
+        if (move.column < 0 || move.column >= COLS) return 0;
+        return state->board[ROWS - 1][move.column] == EMPTY;
     }
+
+    if (move.type == MOVE_REMOVAL) {
+        if (state->removals_remaining[state->current_player] <= 0) return 0;
+        if (move.row < 0 || move.row >= ROWS) return 0;
+        if (move.col < 0 || move.col >= COLS) return 0;
+        return state->board[move.row][move.col] != EMPTY;
+    }
+
+    return 0;
 }
 
-static void apply_removal(GameState *state, Move move) {
-    int row = move.row;
-    int col = move.col;
-    int src;
-
-    /* Remove the piece */
-    state->board[row][col] = CELL_EMPTY;
-
-    /* Apply gravity: shift pieces above the gap downward */
-    for (src = row - 1; src >= 0; src--) {
-        if (state->board[src][col] != CELL_EMPTY) {
-            state->board[src + 1][col] = state->board[src][col];
-            state->board[src][col] = CELL_EMPTY;
+int check_win(const GameState *state, int player) {
+    for (int r = 0; r < ROWS; r++) {
+        for (int c = 0; c <= COLS - 4; c++) {
+            if (state->board[r][c] == player &&
+                state->board[r][c+1] == player &&
+                state->board[r][c+2] == player &&
+                state->board[r][c+3] == player) return 1;
         }
     }
 
-    /* Decrement removal count */
-    state->removals_remaining[state->current_player]--;
-}
-
-/* Check whether a specific player has 4-in-a-row on the board. */
-static int check_win_for_player(const GameState *state, int player) {
-    int row, col, i;
-
-    /* Horizontal */
-    for (row = 0; row < ROWS; row++) {
-        for (col = 0; col <= COLS - 4; col++) {
-            int ok = 1;
-            for (i = 0; i < 4; i++)
-                if (state->board[row][col + i] != player) { ok = 0; break; }
-            if (ok) return 1;
+    for (int c = 0; c < COLS; c++) {
+        for (int r = 0; r <= ROWS - 4; r++) {
+            if (state->board[r][c] == player &&
+                state->board[r+1][c] == player &&
+                state->board[r+2][c] == player &&
+                state->board[r+3][c] == player) return 1;
         }
     }
 
-    /* Vertical */
-    for (col = 0; col < COLS; col++) {
-        for (row = 0; row <= ROWS - 4; row++) {
-            int ok = 1;
-            for (i = 0; i < 4; i++)
-                if (state->board[row + i][col] != player) { ok = 0; break; }
-            if (ok) return 1;
+    for (int r = 0; r <= ROWS - 4; r++) {
+        for (int c = 0; c <= COLS - 4; c++) {
+            if (state->board[r][c] == player &&
+                state->board[r+1][c+1] == player &&
+                state->board[r+2][c+2] == player &&
+                state->board[r+3][c+3] == player) return 1;
         }
     }
 
-    /* Diagonal (top-left to bottom-right) */
-    for (row = 0; row <= ROWS - 4; row++) {
-        for (col = 0; col <= COLS - 4; col++) {
-            int ok = 1;
-            for (i = 0; i < 4; i++)
-                if (state->board[row + i][col + i] != player) { ok = 0; break; }
-            if (ok) return 1;
-        }
-    }
-
-    /* Diagonal (top-right to bottom-left) */
-    for (row = 0; row <= ROWS - 4; row++) {
-        for (col = 3; col < COLS; col++) {
-            int ok = 1;
-            for (i = 0; i < 4; i++)
-                if (state->board[row + i][col - i] != player) { ok = 0; break; }
-            if (ok) return 1;
+    for (int r = 3; r < ROWS; r++) {
+        for (int c = 0; c <= COLS - 4; c++) {
+            if (state->board[r][c] == player &&
+                state->board[r-1][c+1] == player &&
+                state->board[r-2][c+2] == player &&
+                state->board[r-3][c+3] == player) return 1;
         }
     }
 
     return 0;
 }
 
-/* Public wrapper: checks whether state->current_player has 4-in-a-row. */
-int check_win(const GameState *state) {
-    return check_win_for_player(state, state->current_player);
-}
-
 int is_board_full(const GameState *state) {
-    int col;
-    for (col = 0; col < COLS; col++)
-        if (!gamestate_is_column_full(state, col))
-            return 0;
+    for (int c = 0; c < COLS; c++) {
+        if (state->board[ROWS - 1][c] == EMPTY) return 0;
+    }
     return 1;
 }
 
-GameState apply_move(const GameState *state, Move move) {
-    GameState new_state;
-    int mover    = state->current_player;
-    int opponent = 1 - mover;
+static void apply_gravity_column(GameState *state, int col) {
+    int write = 0;
+    for (int r = 0; r < ROWS; r++) {
+        if (state->board[r][col] != EMPTY) {
+            int piece = state->board[r][col];
+            state->board[r][col] = EMPTY;
+            state->board[write][col] = piece;
+            write++;
+        }
+    }
+}
 
-    gamestate_copy(state, &new_state);
+void apply_move(GameState *state, Move move) {
+    int mover = state->current_player;
 
-    if (move.type == MOVE_PLACEMENT)
-        apply_placement(&new_state, move);
-    else
-        apply_removal(&new_state, move);
-
-    /*
-     * After applying the move (including gravity for removals), check both
-     * players for a winning line.
-     *
-     * For placement moves only the mover can gain a new 4-in-a-row, but for
-     * removal moves gravity can create a 4-in-a-row for either player.
-     *
-     * Priority: mover wins are checked first.  If only the opponent has a
-     * 4-in-a-row the opponent wins.  In the degenerate case where gravity
-     * leaves both players with 4-in-a-row simultaneously we award the win to
-     * the mover — the mover chose the resulting board, so they are credited
-     * with the winning position; the opponent's line is treated as a
-     * pre-existing coincidence rather than an active win.
-     */
-    if (check_win_for_player(&new_state, mover)) {
-        new_state.winner = mover;
-        new_state.is_terminal = 1;
-    } else if (check_win_for_player(&new_state, opponent)) {
-        new_state.winner = opponent;
-        new_state.is_terminal = 1;
-    } else if (is_board_full(&new_state)) {
-        new_state.is_terminal = 1;
-        new_state.winner = WINNER_NONE;
+    if (move.type == MOVE_PLACEMENT) {
+        for (int r = 0; r < ROWS; r++) {
+            if (state->board[r][move.column] == EMPTY) {
+                state->board[r][move.column] = mover;
+                break;
+            }
+        }
+    } else {
+        state->board[move.row][move.col] = EMPTY;
+        apply_gravity_column(state, move.col);
+        state->removals_remaining[mover]--;
     }
 
-    /* Switch player if game is not terminal */
-    if (!new_state.is_terminal)
-        new_state.current_player = opponent;
+    int opponent = (mover == PLAYER_X) ? PLAYER_O : PLAYER_X;
+    if (check_win(state, mover)) {
+        state->is_terminal = 1;
+        state->winner = mover;
+    } else if (check_win(state, opponent)) {
+        state->is_terminal = 1;
+        state->winner = opponent;
+    } else if (is_board_full(state)) {
+        state->is_terminal = 1;
+        state->winner = 0;
+    }
 
-    return new_state;
+    state->current_player = opponent;
 }

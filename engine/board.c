@@ -1,88 +1,54 @@
 #include <stdio.h>
+#include <string.h>
 #include "board.h"
 
-void gamestate_init(GameState *state) {
-    int r, c;
-    for (r = 0; r < ROWS; r++)
-        for (c = 0; c < COLS; c++)
-            state->board[r][c] = CELL_EMPTY;
-    state->current_player = CELL_P0;
-    state->removals_remaining[0] = 1;
-    state->removals_remaining[1] = 1;
+void init_game(GameState *state) {
+    memset(state->board, 0, sizeof(state->board));
+    state->current_player = PLAYER_X;
+    state->removals_remaining[0] = 0;
+    state->removals_remaining[PLAYER_X] = 1;
+    state->removals_remaining[PLAYER_O] = 1;
     state->is_terminal = 0;
-    state->winner = WINNER_NONE;
+    state->winner = 0;
 }
 
-void gamestate_copy(const GameState *src, GameState *dst) {
-    *dst = *src;
+char cell_char(int cell) {
+    switch (cell) {
+        case PLAYER_X: return 'X';
+        case PLAYER_O: return 'O';
+        default:       return '.';
+    }
 }
 
-int gamestate_get_cell(const GameState *state, int row, int col) {
-    if (row < 0 || row >= ROWS || col < 0 || col >= COLS)
-        return CELL_EMPTY;
-    return state->board[row][col];
+const char *player_name(int player) {
+    switch (player) {
+        case PLAYER_X: return "X";
+        case PLAYER_O: return "O";
+        default:       return "?";
+    }
 }
 
-void gamestate_set_cell(GameState *state, int row, int col, int value) {
-    if (row >= 0 && row < ROWS && col >= 0 && col < COLS)
-        state->board[row][col] = value;
-}
+void display_board(const GameState *state) {
+    printf("\n    ");
+    for (int c = 0; c < COLS; c++) {
+        printf("%d ", c);
+    }
+    printf("\n    ");
+    for (int c = 0; c < COLS; c++) {
+        printf("--");
+    }
+    printf("\n");
 
-int gamestate_is_column_full(const GameState *state, int col) {
-    int r;
-    for (r = 0; r < ROWS; r++)
-        if (state->board[r][col] == CELL_EMPTY)
-            return 0;
-    return 1;
-}
-
-int gamestate_get_column_height(const GameState *state, int col) {
-    int count = 0, r;
-    for (r = 0; r < ROWS; r++)
-        if (state->board[r][col] != CELL_EMPTY)
-            count++;
-    return count;
-}
-
-int gamestate_is_cell_occupied(const GameState *state, int row, int col) {
-    return gamestate_get_cell(state, row, col) != CELL_EMPTY;
-}
-
-int gamestate_count_pieces(const GameState *state, int player) {
-    int count = 0, r, c;
-    for (r = 0; r < ROWS; r++)
-        for (c = 0; c < COLS; c++)
-            if (state->board[r][c] == player)
-                count++;
-    return count;
-}
-
-void gamestate_display(const GameState *state) {
-    int r, c;
-    for (r = 0; r < ROWS; r++) {
-        printf("%d |", ROWS - 1 - r);
-        for (c = 0; c < COLS; c++) {
-            int cell = state->board[r][c];
-            if (cell == CELL_EMPTY)
-                printf(" .|");
-            else if (cell == CELL_P0)
-                printf(" O|");
-            else
-                printf(" X|");
+    for (int r = ROWS - 1; r >= 0; r--) {
+        printf(" %d| ", r);
+        for (int c = 0; c < COLS; c++) {
+            printf("%c ", cell_char(state->board[r][c]));
         }
         printf("\n");
     }
-    printf("  +--+--+--+--+--+--+--+\n");
-    printf("  | 0| 1| 2| 3| 4| 5| 6|\n\n");
-    printf("Current player: %c\n", state->current_player == CELL_P0 ? 'O' : 'X');
-    printf("Removals remaining: [%d, %d]\n",
-           state->removals_remaining[0], state->removals_remaining[1]);
 
-    if (state->is_terminal) {
-        if (state->winner != WINNER_NONE)
-            printf("GAME OVER: Player %c wins!\n",
-                   state->winner == CELL_P0 ? 'O' : 'X');
-        else
-            printf("GAME OVER: Board is full.\n");
-    }
+    printf("\nTurn: Player %s   |   Removals left  X:%d  O:%d\n",
+           player_name(state->current_player),
+           state->removals_remaining[PLAYER_X],
+           state->removals_remaining[PLAYER_O]);
 }
