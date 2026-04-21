@@ -31,18 +31,23 @@ static void print_banner(void) {
     printf("========================================\n");
 }
 
-static int select_mode(void) {
+static void select_mode(int is_bot[3]) {
+    is_bot[0] = 0;
+    is_bot[PLAYER_X] = 0;
+    is_bot[PLAYER_O] = 0;
+
     char line[INPUT_BUF];
     while (1) {
         printf("\nSelect mode:\n");
         printf("  1) Human vs Human\n");
         printf("  2) Human vs Bot\n");
+        printf("  3) Bot vs Bot\n");
         printf("> ");
         fflush(stdout);
         if (!fgets(line, sizeof(line), stdin)) exit(0);
         trim_newline(line);
 
-        if (strcmp(line, "1") == 0) return 0;
+        if (strcmp(line, "1") == 0) return;
 
         if (strcmp(line, "2") == 0) {
             while (1) {
@@ -50,13 +55,19 @@ static int select_mode(void) {
                 fflush(stdout);
                 if (!fgets(line, sizeof(line), stdin)) exit(0);
                 trim_newline(line);
-                if (line[0] == 'x' || line[0] == 'X') return PLAYER_X;
-                if (line[0] == 'o' || line[0] == 'O') return PLAYER_O;
+                if (line[0] == 'x' || line[0] == 'X') { is_bot[PLAYER_X] = 1; return; }
+                if (line[0] == 'o' || line[0] == 'O') { is_bot[PLAYER_O] = 1; return; }
                 printf("Please enter 'x' or 'o'.\n");
             }
         }
 
-        printf("Please enter 1 or 2.\n");
+        if (strcmp(line, "3") == 0) {
+            is_bot[PLAYER_X] = 1;
+            is_bot[PLAYER_O] = 1;
+            return;
+        }
+
+        printf("Please enter 1, 2, or 3.\n");
     }
 }
 
@@ -165,12 +176,16 @@ int main(void) {
     init_game(&state);
 
     print_banner();
-    int bot_player = select_mode();
+    int is_bot[3];
+    select_mode(is_bot);
 
-    if (bot_player == 0) {
+    if (!is_bot[PLAYER_X] && !is_bot[PLAYER_O]) {
         printf("\nMode: Human vs Human\n");
+    } else if (is_bot[PLAYER_X] && is_bot[PLAYER_O]) {
+        printf("\nMode: Bot vs Bot\n");
     } else {
-        printf("\nMode: Human vs Bot (bot plays %s)\n", player_name(bot_player));
+        int bot = is_bot[PLAYER_X] ? PLAYER_X : PLAYER_O;
+        printf("\nMode: Human vs Bot (bot plays %s)\n", player_name(bot));
     }
     print_help();
     display_board(&state);
@@ -178,7 +193,7 @@ int main(void) {
     char line[INPUT_BUF];
 
     while (!state.is_terminal) {
-        if (bot_player != 0 && state.current_player == bot_player) {
+        if (is_bot[state.current_player]) {
             if (!run_bot_turn(&state)) {
                 printf("Exiting: bot could not produce a legal move.\n");
                 return 1;
